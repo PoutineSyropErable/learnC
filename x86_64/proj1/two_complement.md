@@ -78,3 +78,47 @@ There's no carry over.
 
 
 
+
+====
+Questions: 
+Assuming 8 byte signed values. 
+that's 64 bits. 
+1 sign bits. 63 value bits. 
+
+the minimal value is -1 * 2^(63)
+
+====
+for 4 bits. 
+0 = 
+0 000 
+
+-1 = 
+0 001 
+1 110 
+1 111 
+
+-2 = 
+0 010 
+1 101 
+1 110 
+
+6 = 
+0 110 
+1 001 
+1 010 = -6 
+
+7 = 
+0 111 
+1 000 
+1 001 = -7 
+
+
+1 000 = -8 ? 
+
+1000 000x7
+
+
+s 421
+1 000  
+
+
