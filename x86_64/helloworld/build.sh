@@ -2,6 +2,6 @@
 
 mkdir -p build
 
-nasm -f elf64 hello.asm -o build/hello.o
+nasm -f elf64 hello.asm -o build/hello.o -g -F dwarf
 ld build/hello.o -o build/hello
-build/hello
+gdb -tui build/hello
