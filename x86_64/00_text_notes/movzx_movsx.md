@@ -127,14 +127,15 @@ Sign-extend a 16-bit signed value into a 64-bit register.
 
 
 
-### `movsx reg64, r/m32`  
+# movsxD : Note the D. Double Word: 32 bit
+### `movsxd reg64, r/m32`  
 Sign-extend a 32-bit signed value into a 64-bit register.
 ```asm 
     mov eax, -5         ; EAX = 0xFFFFFFFB = -5
-    movsx rdx, eax      ; RDX = 0xFFFFFFFFFFFFFFFB = -5
+    movsxd rdx, eax      ; RDX = 0xFFFFFFFFFFFFFFFB = -5
 ```
 
-- Note that there is a movsx reg64, r/m32. 
+- Note that like with movzx, a movsx reg64, r/m32.  will cause a crash
 
 
 
