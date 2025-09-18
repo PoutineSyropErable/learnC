@@ -3,7 +3,6 @@ global _start        ; entry point for the linker
 
 section .data
 msg db "Hello, World!", 10  ; string with newline
-<<<<<<< HEAD
 ; db is for declare byte
 ; 10 is for the newline.
 len equ $ - msg              ; length of the string
@@ -16,16 +15,10 @@ my_array64 dq 2, 4, 6, 8, 10   ; 5 integers, 8 bytes each
 
 
 
-section .text
-_start:
-=======
-len equ $ - msg              ; length of the string
 
 section .text
 _start:
-	mov rax, 1
     ; write(1, msg, len)
->>>>>>> 217bcf8c3f95e9c6be40772d339326056bc92f9d
     mov rax, 1      ; syscall number 1 = write
     mov rdi, 1      ; file descriptor 1 = stdout
     mov rsi, msg    ; pointer to string
