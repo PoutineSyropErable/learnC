@@ -8,7 +8,7 @@ if it was big endian, then it would be stored.
 
 1 hex = 4bits. 
 1 byte = 2hex. 
-1 dword = 8 hex. 
+1 dword (32 bits) = 8 hex. 
 
 Big endian: 
 hex7_hex6 hex5_hex4 hex3_hex2 hex1_hex0 
