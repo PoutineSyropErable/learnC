@@ -209,3 +209,89 @@ imul rax, rbx, 5  ; rax = rbx * 5
 opw rax 
 ```
 
+
+
+---
+---
+# Difference between mul and imul
+
+starting values:
+```c
+AX = -5  ; signed
+BX = 3
+```
+
+imul:
+```asm
+mov ax, -5 
+mov bx, 3
+imul ax  ; DX:AX = AX * BX (signed)
+
+ax = 0xFFF1 = -15
+dx = 0xFFFF = -1  
+```
+
+mul:
+```asm
+mov ax, -5 
+mov bx, 3
+mul ax ; DX:AX = AX * BX (unsigned)
+
+ax = 0x00F1 = 241 
+dx = 0x0003 = 3
+
+```
+
+
+this is because the algorithm are different:
+
+- Signed multiply (`imul`)
+```python
+# Treat AX and BX as signed numbers
+signed_AX = sign_extend_16_to_32(AX)   # -5
+
+signed_BX = sign_extend_16_to_32(BX)   # 3
+
+# Multiply
+result = signed_AX * signed_BX         # 32-bit signed result
+
+# Store low 16 bits in AX
+AX = result & 0xFFFF
+
+# Store high 16 bits in DX (upper bits of signed result)
+DX = (result >> 16) & 0xFFFF
+
+```
+
+
+
+- Unsigned multiply (`mul`)
+```python
+# Treat AX and BX as unsigned numbers
+unsigned_AX = AX & 0xFFFF   # Mask to 16-bit unsigned
+unsigned_BX = BX & 0xFFFF
+
+# Multiply
+result = unsigned_AX * unsigned_BX   # 32-bit result
+
+# Store low 16 bits in AX
+AX = result & 0xFFFF
+
+# Store high 16 bits in DX
+DX = (result >> 16) & 0xFFFF
+```
+
+
+The difference comes from
+```python
+
+signed_AX = sign_extend_16_to_32(AX)   # -5
+# this will pad the left with 1s if the number is negative. 
+# and with 0 if the number is positive
+
+
+unsigned_AX= unsigned_extend_16_to_32(AX) 
+unsigned_AX = AX & 0xFFFF   # Mask to 16-bit unsigned
+# this always pad the left with just 0s
+
+```
