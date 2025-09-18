@@ -1,4 +1,4 @@
-short main() {
+int main() {
 
 	short a;
 	int b[6];
