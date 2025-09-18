@@ -1,29 +1,29 @@
-rax = r0
+rax = r0 = R0
 eax. = r0d
 ax. = r0w
 ah, al = _, r0b
 
 
 
-rbx = r3
+rbx = r3 = R3
 ebx
 bx 
 bh, bl
 
 
-rcx = r1 
+rcx = r1 = R1
 ecx
 cx
 ch, cl
 
 
-rdx = r1 
+rdx = r2 = R2
 edx
 dx 
 dh, dl
 
 
-rsp = r4 : stack pointer
+rsp = r4 = R4: stack pointer
 esp 
 sp 
 spl : No way to access the most significant byte
