@@ -29,7 +29,7 @@ imul r/m8    | AX = AL * r/m8
 
 ```
 
-imul r/m16   | DX: AX = AX * r/m16 
+imul r/m16   | DX:AX = AX * r/m16 
 ```asm
     mov ax, 5
     mov bx, 3
@@ -64,7 +64,7 @@ imul r/m16   | DX: AX = AX * r/m16
 
 ```
 
-imul r/m32   | EDX: EAX = EAX * r/m32
+imul r/m32   | EDX:EAX = EAX * r/m32
 ```asm
     mov eax, 5
     mov ebx, 3
@@ -81,7 +81,7 @@ imul r/m32   | EDX: EAX = EAX * r/m32
 
 ```
 
-imul r/m64   | RDX: RAX = RAX * r/m64
+imul r/m64   | RDX:RAX = RAX * r/m64
 ```asm
 
     mov rax, 5
