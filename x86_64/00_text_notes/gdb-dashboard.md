@@ -29,7 +29,8 @@ gdb ./build/hello
 
 
 
-```gdb
+```bash
+# gdb commands, but bash offer better coloring
 b main 
 call main 
 r 
