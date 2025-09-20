@@ -20,3 +20,12 @@ NOT The value at 0x1015
 
 ---
 
+practice: 
+just use gnome calculator or Qalculate! 
+```asm 
+mov rsi, 0x817E4AD0
+mov rax, 0x89
+lea rax, [rsi+rax*1]
+
+rax = 0x817E4AD0 + 0x89+1
+```
