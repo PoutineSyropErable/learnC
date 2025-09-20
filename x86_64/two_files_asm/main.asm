@@ -1,5 +1,8 @@
-; ======================== main.s ========================
+; ======================== main.asm ========================
 BITS 64
+; nasm style
+
+.extern math_op
 
 section .text
 global _start

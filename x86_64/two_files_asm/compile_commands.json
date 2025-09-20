@@ -1,0 +1,26 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "build/main.o",
+      "main.s"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64/two_files_asm",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64/two_files_asm/main.s",
+    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64/two_files_asm/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "build/math_op.o",
+      "math_op.s"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64/two_files_asm",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64/two_files_asm/math_op.s",
+    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64/two_files_asm/build/math_op.o"
+  }
+]

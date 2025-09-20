@@ -2,6 +2,7 @@
 .text
 .global _start
 .type _start, @function
+; gas style
 
 _start:
     mov rdi, 5
