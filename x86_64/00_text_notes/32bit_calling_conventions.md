@@ -188,21 +188,113 @@ return address bar() to foo()           |
 Hence, local variable and function arguments might be addressed as :
 
 ```asm
+caller: 
+    
+    ; note that these push of the og rdi before the function call is like how in mips, they are at the top of the caller. 
+    ; and one right before the function is optional too. 
+    push rdi ; save old value of rdi
+    push rsi ; save the old value of rsi
+    ... ; save the other values
+    ; note that this save for another purpose then the mips callee push and pop of function arguments. 
+    ; Here, it's to obtain callers' rdi again after the function. 
+    ; the mips push was to obtain the myfunc's argument rdi again after. 
+    ; which serves a different purpose. and isn't very useful if you use immediates argument paramerters. 
+    ; (The mips is useless for immediate. This one here is good)
+
+    mov rdi, 1
+    mov rsi, 2 
+    mov rdx, 3 
+    mov rcx, 4 
+    mov r8, 5 
+    mov r9, 6 
+    push 7 ; other function arguments
+    push 8 ;
+    ; you wouldn't push rdi... r9 here. You do so inside the function body. 
+    ; That is if in the function you need to modify the register, but also access the og variable. 
+    ; in which state, the function arguments are local variable of the function. 
+    ; hence, a mips like push for rdi... r9 inside function_start
+    call function_start
+
+    pop rdi ; restore the old value of rdi
+    pop rsi ; restore the old value of rsi
+    ... ; restore the other values
+    
+
+    ret 
 function_start:
     ;prologue 
     push rbp 
     mov rbp, rsp
+
+    ; a push of rdi here 
+    ; (if you need to modify rdi, but also access the og rdi.)
+    ; In that point of view, it would be like if rdi is a local variable. 
+    ; And we do something like a_copy = a (a is var1). Then later access a. 
+    ; do it if you need to. But it's not necessary. 
     
     ; local var 
     sub rsp, something 
 
+    mov func_args [ebp-something] ; to access 7, 8
     mov local_var [ebp+something]
-    mov func_args [ebp-something]
 
     push next_func_arg1_reg
     mov rd1, 1
     call func2
+    pop next_func_arg1_reg
+
+    ; and a pop of rdi here 
+    ; would only be needed to get the value of rdi (1) (as function argument) back after the function. 
+
+    ret 
 
 ```
+
+## First thought
+- We end up with a very mips like system, as it's kinda the same thing: 
+## After more thought: 
+- but done at a different place. 
+## After some more thought: 
+- However, it does end up having a different purpose. One is to retain the myfunc arg1 after the call  (mips)
+- The other is to retain the caller (main) arg1 after the call to myfunc. 
+- Or whatever rdi (arg1 register) was before the call. 
+- Which is a logical thing to do, same as pushing the extra arguments before the call. 
+- So there isn't really any thing different. It's just the logical way to do things
+
+
+## Final thought: 
+- If we have chained call. where we do something like 
+```c 
+
+int func1(int a, int b) {
+    return func2(a*2, 6); 
+}
+```
+
+then, the saving of the a's value will be done right before the call to func2, but thats also right after the start of func1
+which is kinda the prologue of func1. 
+
+Then, by symmetry, a restore to a (if -O0) will be placed right after the call to func2, which is also the end of 
+func1. So with -O0, it does a similar thing, just different pov. 
+
+# True Final thought: 
+- However, as I said, its for a different purpose so it wont do the same thing. 
+- Like, if we do some work with regular a in func1 before the end, then we need to restore after func2. 
+- So it won't be before the end. 
+- Again, this is for a different purpose kind of thing. Hence, even in mips, I'd logically restore after func2 call. 
+
+# Recap: 
+- It's for different things. The callee push/pop and caller push/pop. It's not a convention thing, just a logical result. 
+- In mips, I just had an extra pop/restore in the callee. 
+
+
+# Comparaison to saved temporary registers, and temporary registers. 
+- Here, the saved temporary registers usage of pushing at the start of a function the function_start one, and popping at the end 
+- Was kinda dumb/useless. At least, much less useful then doing some storing the previous value of rdi, before we do a mov for the new function argument. 
+- (Comparing storing before the mov for function arguments, and after. )
+- before: Smart
+- After: Mips (Also, We did it in the function body. (After the call, not before), 
+    - but that is computationally the same thing, just different order. )
+
 
 
