@@ -18,11 +18,13 @@
 main:
 	push	rbp
 	mov	rbp, rsp
+
 	nop
 .L2:
 	lea	rax, .LC0[rip]
 	mov	rdi, rax
 	call	puts@PLT
+
 	mov	eax, -1340212530
 	pop	rbp
 	ret
