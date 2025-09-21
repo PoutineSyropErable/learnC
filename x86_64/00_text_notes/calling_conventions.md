@@ -32,6 +32,25 @@ Microsoft x64 abi, and the System V "x86_64" abi (the only two talking about in 
 ## These registers belong to the callee
 ## The caller is in charged of saving before call, and restoring after call
 
+; for easy <leader>FG ;
+ARG1: RDI: 1 
+ARG2: RSI: 2 
+ARG3: RDX: 3 
+ARG4: RCS: 4 
+ARG5: R8: 5 
+ARG6: R9: 5 
+ARG7: STACK 
+ARG8+: STACK
+; for easy <leader>FG ;
+
+| ------------- |
+| Item1 |
+| Item2 |
+| Item3 |
+| Item4 |
+
+
+
 
 # Callee Saved (Start/end of myfunc)
 

@@ -337,6 +337,7 @@ For now:
     - 0 indicate positive value. 1 indicate negative value. 
     - But it doesn't necessarily means sign. Since the cpu doesnt know if it was signed or not. 
     - And it has "kinda" ignored/undefined behavior after certain instructions. 
+    - The hardware doesn't know. It's the programmers/compilers job
 
 Optional from chatgpt: 
 - CF: Carry flag 
