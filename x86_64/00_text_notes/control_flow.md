@@ -354,6 +354,7 @@ Some Notable Jcc Instructions
 - JGE/JNL : if SF == OF
 - JBE/JNA: if CF \=\= 1 OR ZF \=\= 1
 - JB: if CF == 1
+- JS: If the sign is 1. (If the last instruction set the most significant bit to 1)
 
 
 
