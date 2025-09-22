@@ -8,6 +8,7 @@ Search headers:
 ### Arithmetic: Cares about sign. It's more about math operations. Bitshift here is for multiply by 2 / divide by 2. 
 ### It must work for signed numbers
 
+----
 
 # SHL, SHR: Logical Shift Left/Right. 
 Unsigned. Adds zeros
@@ -36,6 +37,10 @@ shl eax, 2
 <--
 eax = eax << 2 
 
+the last bit which got shifted off.  
+Carry flag is set to that.
+      | 
+      v 
 eax = 11  01_1010b 
 eax =   0100_1010b
 cf = 1 (Carry flag. )
@@ -49,6 +54,8 @@ shl eax, cl
 ; cl is the lower bit of rcx: rcx, ecx, cx, cl
 
 ```
+
+
 
 
 ## SHR: Shift Logical Right 
@@ -104,6 +111,8 @@ The gcc -s partial compiling (or just regular compiling, not compile + assemble)
 However, 
 The object files dissassembly (object dump/objdump) will use SHL. 
 
+-----
+------
 ---
 # SAR - Shift Arithmetic Right  
 For signed values (Division toward -infinity. )
@@ -226,3 +235,97 @@ Microsoft Visual C++
 the CDQ instruction is a VS-ism. (msvc cl.exe, windows). Won't see it myself
 
 convert dword to qword. Just to make the math work out. 
+
+
+
+
+## # Carry Flag behavior: 
+
+The LAST BIT which gets shifted off, is the one who the carry flag is set to. 
+- IT is NOT, IT doesn't work following a (if at least one bit who got shifted off was a 1, then it's one). 
+- It's like an update loop. every loop itteration takes the (to be removed bit), set the carry flag to it. 
+    - and then shift that bit off. Repeat untill we hit the itteration number. 
+    - We can only read the final state. Aka, the value of the final "killed" bit
+
+
+Using loops
+```asm
+; Example 1: SHL (Shift Logical Left)
+; eax = 8-bit value 0b1011_0101
+mov al, 0b10110101
+; shift left by 3
+shl al, 3
+; Result after each shift (showing CF as the shifted out bit):
+; Step 1: 0b01101010 , CF=1 (leftmost bit of original: 1)
+; Step 2: 0b11010100 , CF=0 (next leftmost bit: 0)
+; Step 3: 0b10101000 , CF=1 (last bit shifted out: 1)
+; Final AL = 0b10101000
+; CF = 1
+
+; Example 2: SHR (Shift Logical Right)
+; eax = 8-bit value 0b10110101
+mov al, 0b10110101b
+; shift right by 3
+shr al, 3
+; Step 1: 0b01011010 , CF=1 (rightmost bit of original: 1)
+; Step 2: 0b00101101 , CF=0 (next rightmost bit: 0)
+; Step 3: 0b00010110 , CF=1 (last bit shifted out: 1)
+; Final AL = 0b00010110
+; CF = 1
+```
+
+- Note: Chatgpt is using al because it's an 8bit value. A 1 byte value. So it makes sense. 
+- This way, it properly gets shifted out (out of al). 
+- Though for right shift >>, it wouldn't matter. 
+- This happens because the cpu it's the same instruction, but the instruction wiring check the size 
+- To know where to track the overflow value. 
+
+Showing final result
+```asm
+; Example 1: SHL by 3
+mov al, 0b10110101b
+shl al, 3
+;          0b10110101  ; original
+; 101  0b10101000      ; bits shifted off | result
+;   ^- last bit shifted out -> CF = 1
+
+; Example 2: SHL by 2
+mov al, 0b01101110b
+shl al, 2
+;          0b01101110
+; 01   0b10111000
+;    ^- last bit shifted out -> CF = 1
+
+; Example 3: SHR by 3
+mov al, 0b10110101b
+shr al, 3
+;          0b10110101
+; 101  0b00010110
+;   ^- last bit shifted out -> CF = 1
+
+; Example 4: SHR by 2
+mov al, 0b01101110b
+shr al, 2
+;          0b01101110
+; 10   0b00011011
+;    ^- last bit shifted out -> CF = 0
+
+; Example 5: SHL by 1
+mov al, 0b10000001b
+shl al, 1
+;          0b10000001
+; 1   0b00000010
+; ^- last bit shifted out -> CF = 1
+
+; Example 6: SHR by 1
+mov al, 0b00000011b
+shr al, 1
+;          0b00000011
+; 1   0b00000001
+; ^- last bit shifted out -> CF = 1
+
+
+
+```
+
+***
