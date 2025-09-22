@@ -41,4 +41,3 @@ main:
 
 
 
-; Table of rounding for divide by 16. for 32-48: 
