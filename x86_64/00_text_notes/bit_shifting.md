@@ -13,9 +13,12 @@ Search headers:
 Unsigned. Adds zeros
 
 ## SHL - Shift Logical Left : 
+For unsigned values. Or just pure litteal bit shifting
+\<\< in C. 
 
+- Note that this is equal to SAL: Shift arithmetic right. It's just a different mnemonic for the same opcode. 
+- That's because both put a 0 on the right bit that are now unset. 
 
-<< in C. 
 First operand: Source and destination. Is an r/mX
 
 second operand is either cl (lowest byte of rcx), or a 1 byte immediate. 
@@ -49,10 +52,10 @@ shl eax, cl
 
 
 ## SHR: Shift Logical Right 
-
-
-
+For unsigned values. Or just pure litteral bit shifting
 \>\> in C. 
+
+
 First operand: Source and destination. Is an r/mX
 
 second operand is either cl (lowest byte of rcx), or a 1 byte immediate. 
@@ -60,9 +63,6 @@ The second operand is the number of places to shift
 
 
 It divide the register by 2 for each place the value is shifted. More efficient then a division instruction.
-Note that this divide toward -infinity. 
-Positive numbers are rounded down (smaller abs value)
-Negative numbers are rounded down/"up" (higher abs value)  {Officially, it rounds down. "up" is a dumb me thing. hence the ""}
 Bits shifted off the right hand are shifted into (set) the carry flag (CF)
 
 Note that C have numbers rounded toward 0. So smallest absolute values
@@ -88,6 +88,63 @@ shr eax, cl
 ; cl is the lower bit of rcx: rcx, ecx, cx, cl
 
 ```
+
+---
+# SAL - Shift Arithmetic Left
+For signed values  (Multiplication)
+\<\< in C
+
+- Note that this is equal to SHL: Shift arithmetic right. It's just a different mnemonic for the same opcode. 
+- That's because both put a 0 on the right bit that are now unset. 
+
+GAS Prefers to use SAL over SHL. 
+AKA: 
+The gcc -s partial compiling (or just regular compiling, not compile + assemble)  will use SAL. 
+
+However, 
+The object files dissassembly (object dump/objdump) will use SHL. 
+
+---
+# SAR - Shift Arithmetic Right  
+For signed values (Division toward -infinity. )
+\>\> in C    
+
+- SAR shifts right while preserving the sign bit (most significant bit) for signed numbers.  
+- Negative numbers remain negative; positive numbers remain positive.  
+- Used for signed division by powers of 2.  
+
+First operand: Source and destination. Is an r/mX  
+
+Second operand: cl (lowest byte of rcx) or a 1 byte immediate.  
+
+- Divides by 2 for each shift.  
+- Bits shifted in from the left are copies of the original sign bit. (the unset left bits are set to SF)  
+- Bits shifted out on the right set the carry flag (CF).  
+
+
+Note that this divide toward -infinity. 
+Positive numbers are rounded down (smaller abs value)
+Negative numbers are rounded down/"up" (higher abs value)  {Officially, it rounds down. "up" is a dumb me thing. hence the ""}
+
+```asm
+
+mov eax, -32  
+sar eax, 2  
+; eax = -32 >> 2 (arithmetic)  
+; eax = -8  
+; preserves sign  
+
+mov eax, 16  
+sar eax, 2  
+; eax = 16 >> 2  
+; eax = 4  
+
+mov eax, -32  
+mov cl, 2  
+sar eax, cl  
+; variable shift using CL  
+
+```  
 
 
 
@@ -140,19 +197,32 @@ So, to get rounding toward 0 behavior like in c:
 
 ```asm 
 
-	; this is all for doing division toward 0, not infinity.  
-	lea	eax, 15[rdx] ; rdx + 15
-	; eax = edx + 15;  (We'll be dividing by 16, so add 15)
-	test	edx, edx ; is the rightmost bit of edx 0; 
+// Abuse of labels lol
+C: 
+int b = some_number;
+edx = b;
 
-	cmovns	eax, edx ; 	
-	; if it's negative, eax = edx (b) + 15; 
-	; if it's positive, eax = edx (b); 
-	; vv the actual division code vv 
-	sar	eax, 4 ;(divide by 16)
+ASM:
+; this is all for doing division toward 0, not infinity.  
+lea	eax, [rdx + 15] ; rdx + 15
+; eax = edx + 15;  (We'll be dividing by 16, so add 15)
+test	edx, edx ; is the rightmost bit of edx 0; 
+; check if it's negative
+
+cmovns	eax, edx ; 	
+; if it's negative, eax = edx (b) + 15; 
+; if it's positive, eax = edx (b); 
+; vv the actual division code vv 
+sar	eax, 4 ;(divide by 16)
 
 
 ```
 
 
+---
+# Extra 
 
+Microsoft Visual C++
+the CDQ instruction is a VS-ism. (msvc cl.exe, windows). Won't see it myself
+
+convert dword to qword. Just to make the math work out. 
