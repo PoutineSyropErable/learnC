@@ -24,6 +24,7 @@ where:
 ```
 
 - Note this appear with proper above/bottom in a better previewer then neovim
+
 $$
 \frac{\text{Dividend}}{\text{Divisor}} = \text{Quotient} + \frac{\text{Remainder}}{\text{Divisor}}
 $$
