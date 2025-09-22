@@ -1,0 +1,54 @@
+	.file	"rep.c"
+	.intel_syntax noprefix
+	.text
+	.globl	func
+	.type	func, @function
+func:
+	push	rbp
+	mov	rbp, rsp
+	mov	DWORD PTR -4[rbp], edi
+	mov	eax, DWORD PTR -4[rbp]
+	pop	rbp
+	ret
+	.size	func, .-func
+	.globl	main
+	.type	main, @function
+main:
+	push	r14
+	push	rbx
+	sub	rsp, 120
+	mov	rbx, rsi 
+	; rdi: arg1 
+	; rsi: arg2 
+	; rdx: arg3
+
+	mov	rdi, QWORD PTR 8[rsi]
+	mov	edx, 10
+	mov	esi, 0
+	call	__isoc23_strtol@PLT
+	mov	r14, rax ; r14 = argv[1]
+
+
+	mov	rdi, QWORD PTR 8[rbx]
+	mov	edx, 10
+	mov	esi, 0
+	call	__isoc23_strtol@PLT
+	mov	rdx, rax
+	mov	QWORD PTR 4[rsp], 0
+	mov	QWORD PTR 92[rsp], 0
+	lea	rdi, 8[rsp]
+	mov	ecx, 11
+	mov	eax, 0
+	rep stosq
+	mov	DWORD PTR [rsp], edx
+	mov	edi, r14d
+	call	func
+	cdqe
+	mov	eax, DWORD PTR [rsp+rax*4]
+	add	rsp, 120
+	pop	rbx
+	pop	r14
+	ret
+	.size	main, .-main
+	.ident	"GCC: (GNU) 15.2.1 20250813"
+	.section	.note.GNU-stack,"",@progbits
