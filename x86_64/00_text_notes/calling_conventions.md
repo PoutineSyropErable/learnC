@@ -49,7 +49,7 @@ ARG8+: STACK
 | Item3 |
 | Item4 |
 
-
+#### RSP is special: It's both callee and caller saved.
 
 
 # Callee Saved (Start/end of myfunc)
@@ -147,6 +147,7 @@ callers saves r12–r15: Store before function, restore after the function.
 r12-r15 are the temporary saved registers. They are VOLATILE registers. 
 If you want to preserve their value, you must save them before the function call, and restore them before call. 
 Like the t0-t8 in MIPS
+
 
 
 
