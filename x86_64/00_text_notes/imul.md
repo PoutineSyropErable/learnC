@@ -104,6 +104,7 @@ imul r16, r/m16     | r16 = r16 * r/m16
 ```asm
 mov ax, 5        ; r16
 mov bx, 3        ; r/m16
+
 imul ax, bx      ; AX = AX * BX = 15 (truncated to 16 bits)
 opw ax           ; use AX
 
@@ -115,6 +116,7 @@ imul r32, r/m32     | r32 = r32 * r/m32
 ```asm
 mov eax, 5       ; r32
 mov ebx, 3       ; r/m32
+
 imul eax, ebx    ; EAX = EAX * EBX = 15 (truncated to 32 bits)
 opd eax          ; use EAX
 
