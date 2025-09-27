@@ -22,11 +22,11 @@ Targets can be specified in multiple ways:
 
 ## 1. Absolute Address
 
-```intel
+```asm intel
 call 0x401000        ; call function at absolute address 0x401000
 ```
 
-```gas
+```asm gas
 call *0x401000       # * means "contents of" → absolute address
 ```
 
@@ -34,11 +34,11 @@ call *0x401000       # * means "contents of" → absolute address
 
 ## 2. Relative Address
 
-```intel
+```asm intel
 call my_function     ; assembler encodes as relative displacement
 ```
 
-```gas
+```asm gas
 call my_function     # assembler handles relative encoding
 ```
 
@@ -46,11 +46,11 @@ call my_function     # assembler handles relative encoding
 
 ## 3. Register Indirect
 
-```intel
+```asm intel
 call rax             ; call address stored in rax
 ```
 
-```gas
+```asm gas
 call *%rax           # note the * and % prefix
 ```
 
@@ -58,12 +58,12 @@ call *%rax           # note the * and % prefix
 
 ## 4. Memory Indirect
 
-```intel
+```asm intel
 call [rax]           ; call address pointed to by rax
 call qword ptr [rbx] ; explicit 64-bit pointer
 ```
 
-```gas
+```asm gas
 call *(%rax)         # call address stored at [rax]
 call *0x10(%rbx)     # call address stored at [rbx+0x10]
 ```
