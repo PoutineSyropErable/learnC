@@ -297,3 +297,25 @@ unsigned_AX = AX & 0xFFFF   # Mask to 16-bit unsigned
 # this always pad the left with just 0s
 
 ```
+
+
+
+--- 
+# Exercise 
+64 bits = 16*4 = 16 hex
+
+0x9C1D E4B4 F0D7 22CD
+* 
+0x4D25C01A
+\=
+0000 0000 2F0C 0342,  C128 7391 8094 48D2
+edx: 0x2f0c 0342 
+eax: c128 7391  8094 48d2
+
+
+edx:eax= 0000 0000 2F0C 0342:C128 7391 8094 48D2
+edx:eax= 000000002F0C0342C1287391809448D2
+edx:eax= 0x2F0C0342C1287391809448D2
+
+
+
