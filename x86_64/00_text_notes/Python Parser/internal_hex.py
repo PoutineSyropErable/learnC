@@ -376,6 +376,7 @@ if __name__ == "__main__":
         print(f"-esp_i = {esp_i}")
 
         high, low = Hex.mul(rax, esp, 32)
+        # -(a * (-b))
 
         print(f"original high, low =  mul(rax, esp, 32) = {high}, {low}")
 

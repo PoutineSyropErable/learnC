@@ -167,6 +167,11 @@ class AsmParser:
         alias_names = [k for k, v in self._input_to_64.items() if v == base64]
         alias_sizes = [self._reg_size[alias_name] for alias_name in alias_names]
 
+        # rax (64)
+        # 32 , 32: eax
+        # 32 , 16 , ax
+        # 32, 16, 8:ah, 8:al
+
         if base64 in ["rax", "rbx", "rcx", "rdx"] and size == 8:
             # We want to modify an ah/al type register
             print(f"Case: {base64}, {size} (Setting a small)")
@@ -320,9 +325,9 @@ if __name__ == "__main__":
 
     parser = AsmParser()
     asm_code = """
-    mov rax, 0x83D4D69BA2BB8743
-    mov r9d, 0xFDEF5450
-    mul r9d
+    mov rax, 0x8C3F47BF4A90CDD5
+    mov cl, 0x07
+    mul cl
     """
 
     print(f"The asm code = {asm_code}")

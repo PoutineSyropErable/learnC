@@ -39,10 +39,14 @@
 _start:
     # ----- argc / argv demonstration -----
 
-	mov al, 0xff
+	# mov al, 0xff
 	#check rax value
-	mov al, 0x05
+	#  mov al, 0x05
 	#check rax value
+
+	mov rax, 0x8C3F47BF4A90CDD5
+	mov cl, 0x07
+	mul cl
 
 
     # ----- Exit -----
