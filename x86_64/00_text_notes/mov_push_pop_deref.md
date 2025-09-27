@@ -120,7 +120,7 @@ lol_func:
 equivalent to 
 
 push rax: 
-=
+\=
 sub rsp, 8       ; make space on stack (x86_64: 8 bytes)
 mov [rsp], rax   ; store the value at top of stack
 
@@ -128,7 +128,7 @@ mov [rsp], rax   ; store the value at top of stack
 
 equivalent to
 pop rax:
-=
+\=
 mov rax, [rsp]   ; read top of stack into register
 add rsp, 8       ; move stack pointer up
 
@@ -136,7 +136,7 @@ add rsp, 8       ; move stack pointer up
 
 push rax 
 pop rax 
-= 
+\= 
 sub rsp, 8       ; make space on stack (x86_64: 8 bytes)
 mov [rsp], rax   ; store the value at top of stack
 mov rax, [rsp]   ; read top of stack into register

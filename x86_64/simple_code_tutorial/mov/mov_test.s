@@ -48,6 +48,8 @@ _start:
 	mov cl, 0x07
 	mul cl
 
+	mov bl, 0xff
+
 
     # ----- Exit -----
     mov     rax, 60          # syscall: exit

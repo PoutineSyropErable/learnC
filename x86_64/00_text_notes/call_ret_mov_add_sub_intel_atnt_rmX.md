@@ -167,12 +167,141 @@ cmp %rsp, %rbp    # compare rbp - rsp
 jle .L1           # jump if (rbp <= rsp)
 
 
+
+```
+
+
+---
+---
+# rm/X
+means 
+
+rm/8, r/m16, r/m32, r/m64. 
+
+r/mX: a register of size X, or read X bits at an address. 
+Memory to memory operations aren't allowed! 
+
+
+Immediate aren't part of r/mX!
+The total is: (r/mX or Immediate). = {Registers} + {Memory Address} + {Immediate}
+
+
+```asm 
+
 GAS: 
 disp(base, index, scale)
 
 INTEL: 
 [ base + index*scale + disp ]
 
+; scale can be 1,2,4,8 
+; disp can be 1byte value: (0-255), or a 4byte value: (0-2^32)
+
+
+```
+
+**Immediate to memory**:
+```asm
+; Intel syntax
+mov [rbx], imm32 ;  *rbx = imm32
+mov [rbx + rcx*X], imm32      ; X can be 1,2,4,8 
+*(rbx + rcx*X) = imm32
+mov [rbx + rcx*X + Y], imm32  ; Y can be whatever. (max 32 bits immediate)
+*(rbx + rcx*X + Y) = imm32
+
+; Both X and Y aren't variables. They must be hardcoded. 
+; Y would be useful to access struct_list[5].banana_count
+; Though it would only work for a struct of 64 bits max size (scale = 8)
+
+
+
+
+```
+
+**Immediate to register**: 
+```asm
+; Intel syntax
+mov rbx, imm64 
+mov ebx, imm32 
+mov bx,  imm16
+mov bl, imm8  ; every register has an accessible *l (bl here) (low)
+mov bh, imm8 ; rbx has an accessible *h (bh here) (high)
+
+; obviously, an imm8 can be put into bx. And smaller immediate can be put into bigger registers. It will just extend the value. 
+
+; The mov extension doesn't care about sign. It does 0 extension. 
+mov bl, 0xff 
+; rax = 0x000(bunchs of zeros)ff 
+
+; There is a movesx, and movezx for sign and 0 extension. 
+; But these don't allow immediates
+
+```
+
+**Register to memory**: 
+```asm 
+mov [rbx], rax 
+mov [rbx + rcx*X], rax 
+mov [rbx + rcx*X + Y], rax 
+
+```
+
+
+
+**Memory to register**: 
+```asm 
+mov rax, [rbx],  
+mov rax, [rbx + rcx*X] 
+mov rax, [rbx + rcx*X + Y]
+
+```
+
+Note: There's nothing special about the registers chosen above
+
+
+----
+Note: It's dumb to say r/mX or a register
+----
+# Add and SUB 
+Add and substract, as espected. 
+    - Destination can be an r/mX 
+    - Source can be an r/mX or an immediate
+
+## **Again, can't have memory to memory**
+
+
+```asm 
+.intel_syntax noprefix
+
+add rsp, 8 ; -> rsp = rsp + 8;
+sub rax, [rbx*2] ; -> rax -= *(rbx *2);
+; Note the sub rax, [rbx*2] is not the proper form. It wouldn't work
+
+
+
+
+```
+
+
+---- 
+# When using memory address, in Intel, you must have a Xword/byte ptr, and in AT&T, the instruction name changes
+
+```asm 
+
+
+; Comments on ptr forms. POINTER forms. Pointer forms. 
+; Xword ptr. xword ptr. (<leader>fg search points) 
+; Here are the proper forms
+sub rax, qword ptr [rbx*2]   ; 64-bit subtraction
+sub eax, dword ptr [rbx*2]   ; 32-bit subtraction, zero-extends to rax
+sub ax, word ptr [rbx*2]     ; 16-bit subtraction
+sub al, byte ptr [rbx*2]     ; 8-bit subtraction
+
+
+
+sub rax, word ptr [rbx*2]   ; 64-bit subtraction
+; Is acceptable. It will sub rax with a 16bits number at rbx*2, and 0 extend it to 64 bits
+; Like masked substraction
 
 ```
 

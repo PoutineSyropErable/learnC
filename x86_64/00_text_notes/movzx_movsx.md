@@ -1,7 +1,9 @@
 To move small values (from small registers) into big register, and what kind of sign extension you want. 
 
 
+
 # Moving Smaller Values into Larger Registers
+- ## **DOESN'T ALLOW IMMEDIATES!!!
 
 When moving a smaller value (8-bit, 16-bit) into a larger register (16-bit, 32-bit, 64-bit), you must decide **how the upper bits are filled**:
 
@@ -13,6 +15,7 @@ When moving a smaller value (8-bit, 16-bit) into a larger register (16-bit, 32-b
 
 ---
 # `movzx` — Move with Zero-Extend
+- ## **DOESN'T ALLOW IMMEDIATES!!!
 
 Move a smaller operand into a larger register, filling the upper bits with `0`.  
 Unsigned-friendly (never propagates sign).
@@ -73,6 +76,7 @@ Zero-extend a 16-bit source into a 32-bit register.
 ---
 
 # `movsx` — Move with Sign-Extend
+- ## **DOESN'T ALLOW IMMEDIATES!!!
 
 `movsx` copies a smaller **signed** operand into a larger register, extending the most significant **sign bit** into the upper bits.  
 This preserves the signed value correctly when increasing register size.
