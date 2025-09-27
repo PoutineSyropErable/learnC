@@ -1,4 +1,4 @@
-from python_calculator import Hex
+from internal_hex import Hex
 
 
 class AsmParser:
@@ -127,8 +127,9 @@ class AsmParser:
             "r15": {"64": "r15", "32": "r15d", "16": "r15w", "8": "r15b"},
         }
 
-        self.low_dict = {8: "al", 16: "ax", 32: "eax", 64: "rax"}
-        self.high_dict = {8: "ah", 16: "dx", 32: "edx", 64: "rdx"}
+        self._low_dict = {8: "al", 16: "ax", 32: "eax", 64: "rax"}
+        self._high_dict = {8: "ah", 16: "dx", 32: "edx", 64: "rdx"}
+        self._last_moved_size = -1
 
     # ========
     def get_alias(self, name: str, bits: int) -> str:
@@ -150,10 +151,10 @@ class AsmParser:
         return self._reg_map[base64][bits_str]
 
     def get_low(self, bits: int):
-        return self.low_dict[bits]
+        return self._low_dict[bits]
 
     def get_high(self, bits: int):
-        return self.high_dict[bits]
+        return self._high_dict[bits]
 
     # ========
     def set_reg(self, name: str, hex_imm: Hex):
@@ -166,9 +167,52 @@ class AsmParser:
         alias_names = [k for k, v in self._input_to_64.items() if v == base64]
         alias_sizes = [self._reg_size[alias_name] for alias_name in alias_names]
 
-        for alias_name, alias_size in zip(alias_names, alias_sizes):
-            self._registers[alias_name] = hex_imm.extend(alias_size)
-            # extend can trunacte
+        if base64 in ["rax", "rbx", "rcx", "rdx"] and size == 8:
+            # We want to modify an ah/al type register
+            print(f"Case: {base64}, {size} (Setting a small)")
+
+            low_name = self._reg_map[base64]["8l"]  # al
+            high_name = self._reg_map[base64]["8h"]  # ah
+
+            # if we want to set ah, we must preserve al.
+            if name == high_name:
+                low_value = self.get_reg(low_name).extend(8)
+                high_value = hex_imm.extend(8)
+            elif name == low_name:
+                low_value = hex_imm.extend(8)
+                high_value = self.get_reg(high_name).extend(8)
+            else:
+                raise AssertionError("Impossible state")
+
+            extended_register_16b = Hex.concat(high_value, low_value)
+            for alias_name, alias_size in zip(alias_names, alias_sizes):
+                if alias_name[-1] == "h":
+                    self._registers[alias_name] = high_value
+                elif alias_name[-1] == "l":
+                    self._registers[alias_name] = low_value
+                else:
+                    self._registers[alias_name] = extended_register_16b.extend(alias_size)
+
+        elif base64 in ["rax", "rbx", "rcx", "rdx"]:
+            # we are modifying a variant which have an ax/al type register
+            print(f"Case: {base64}, {size} (setting a big)")
+            hex16 = hex_imm.extend(16)
+            high_8, low_8 = hex16.split(8)
+            print(f"high_8 = {high_8}, low_8 = {low_8}")
+            for alias_name, alias_size in zip(alias_names, alias_sizes):
+                if alias_name[-1] == "h":
+                    self._registers[alias_name] = high_8.extend(alias_size)
+                elif alias_name[-1] == "l":
+                    self._registers[alias_name] = low_8.extend(alias_size)
+                else:
+                    self._registers[alias_name] = hex_imm.extend(alias_size)
+
+        else:
+            print(f"Case: {base64}, {size} (setting a trivial)")
+            # the other much easier registers.
+            for alias_name, alias_size in zip(alias_names, alias_sizes):
+                self._registers[alias_name] = hex_imm.extend(alias_size)
+                # extend can trunacte
 
     def get_reg(self, name: str) -> Hex:
         """Get a register via any alias, returned as a Hex object truncated to alias size."""
@@ -189,6 +233,7 @@ class AsmParser:
 
     def imul(self, reg_name: str):
         reg_size: int = self._reg_size[reg_name]
+        self._last_moved_size = reg_size
 
         print("imul steps: ")
         arg_value = self.get_reg(reg_name)
@@ -207,8 +252,9 @@ class AsmParser:
 
     def mul(self, reg_name: str):
         reg_size: int = self._reg_size[reg_name]
+        self._last_moved_size = reg_size
 
-        print("imul steps: ")
+        print("\n\nmul steps: ")
         edx, eax = Hex.mul(self.get_reg("rax"), self.get_reg(reg_name), reg_size)
         edx_name = self.get_high(reg_size)
         eax_name = self.get_low(reg_size)
@@ -222,6 +268,8 @@ class AsmParser:
 
     def idiv(self, reg_name: str):
         reg_size: int = self._reg_size[reg_name]
+        self._last_moved_size = reg_size
+
         edx, eax = Hex.idiv(self.get_reg("rax"), self.get_reg(reg_name), reg_size)
         edx_name = self.get_high(reg_size)
         eax_name = self.get_low(reg_size)
@@ -231,6 +279,8 @@ class AsmParser:
 
     def div(self, reg_name: str):
         reg_size: int = self._reg_size[reg_name]
+        self._last_moved_size = reg_size
+
         edx, eax = Hex.div(self.get_reg("rax"), self.get_reg(reg_name), reg_size)
         edx_name = self.get_high(reg_size)
         eax_name = self.get_low(reg_size)
@@ -239,6 +289,7 @@ class AsmParser:
         self.set_reg(eax_name, eax)
 
     def mov_reg_imm(self, reg_name: str, imm: Hex):
+        self._last_moved_size = self._reg_size[reg_name]
         self.set_reg(reg_name, imm)
 
     def parse_line(self, line: str):
@@ -264,12 +315,14 @@ class AsmParser:
 
 
 if __name__ == "__main__":
+
     print("\n==start of program==\n")
+
     parser = AsmParser()
     asm_code = """
-    mov rax, 0xCE8C6E899F6397A6
-    mov r14b, 0x66
-    mul r14b
+    mov rax, 0x83D4D69BA2BB8743
+    mov r9d, 0xFDEF5450
+    mul r9d
     """
 
     print(f"The asm code = {asm_code}")
@@ -282,34 +335,39 @@ if __name__ == "__main__":
     parser.print_reg("edx")
     parser.print_reg("eax")
 
-    print("\n==== 64 bit size ====")
-    rdx = parser.get_reg("rdx")
-    rax = parser.get_reg("rax")
+    size = parser._last_moved_size
+    if size == 64:
+        print("\n==== 64 bit size ====")
+        rdx = parser.get_reg("rdx")
+        rax = parser.get_reg("rax")
 
-    print(f"result = 0x{rdx.val}:{rax.val}")
-    print(f"result = 0x{rdx.val}{rax.val}")
+        print(f"result = 0x{rdx.val}:{rax.val}")
+        print(f"result = 0x{rdx.val}{rax.val}")
 
-    print("\n==== 32 bit size ====")
-    edx = parser.get_reg("edx")
-    eax = parser.get_reg("eax")
+    if size == 32:
+        print("\n==== 32 bit size ====")
+        edx = parser.get_reg("edx")
+        eax = parser.get_reg("eax")
 
-    print(f"result = 0x{edx.val}:{eax.val}")
-    print(f"result = 0x{edx.val}{eax.val}")
+        print(f"result = 0x{edx.val}:{eax.val}")
+        print(f"result = 0x{edx.val}{eax.val}")
 
-    print("\n==== 16 bit size ====")
-    dx = parser.get_reg("dx")
-    ax = parser.get_reg("ax")
+    if size == 16:
+        print("\n==== 16 bit size ====")
+        dx = parser.get_reg("dx")
+        ax = parser.get_reg("ax")
 
-    print(f"result = 0x{dx.val}:{ax.val}")
-    print(f"result = 0x{dx.val}{ax.val}")
+        print(f"result = 0x{dx.val}:{ax.val}")
+        print(f"result = 0x{dx.val}{ax.val}")
 
-    print("\n==== 8 bit size ====")
-    ax = parser.get_reg("ax")
-    ah = parser.get_reg("ah")
-    al = parser.get_reg("al")
+    if size == 8:
+        print("\n==== 8 bit size ====")
+        ax = parser.get_reg("ax")
+        ah = parser.get_reg("ah")
+        al = parser.get_reg("al")
 
-    print(f"result = 0x{ah.val}:{al.val}")
-    print(f"result = 0x{ah.val}{al.val}")
-    print(f"result = {ax}")
+        print(f"result = 0x{ah.val}:{al.val}")
+        print(f"result = 0x{ah.val}{al.val}")
+        print(f"result = {ax}")
 
     # ====
