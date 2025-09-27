@@ -1,4 +1,18 @@
+from typing import List
 from internal_hex import Hex
+from enum import Enum
+
+
+class ArgType(Enum):
+    REGISTER = 1
+    MEMORY = 2
+    IMMEDIATE = 3
+
+
+class MemoryType(Enum):
+    REG = 1  # [rax]
+    REG_SCALE = 2  # [rax + rbx*2]
+    REG_SCALE_OFFSET = 3  # [rax + rbx*2 + 0x2354ac]
 
 
 class AsmParser:
@@ -232,11 +246,67 @@ class AsmParser:
 
     # ========
 
-    def mov(self, rmX1: str, rmX2_i: str):
+    def mov(self, rmX1: str, rmX2_i: str, arg_types: List[ArgType]):
         assert "[" not in rmX2_i, "no support for memory address for now"
         self.mov_reg_imm(rmX1, Hex(rmX2_i))
 
-    def imul(self, reg_name: str):
+    def imul(self, args: List[str], arg_types: List[ArgType]):
+        argc: int = len(args)
+        if argc > 3 or argc == 0:
+            raise AssertionError("argc is wrong")
+
+        if argc == 1 and arg_types[0] == ArgType.REGISTER:
+            self.imul_form1(args[0])
+
+        if argc == 2:
+            self.imul_form2(args[0], args[1])
+
+        if argc == 3:
+            # reg, reg, imm
+            reg1 = args[0]
+            reg2 = args[1]
+            imm = Hex(args[2])
+
+            imm_size = imm.get_smallest_required_size8()
+            if imm_size == 8:
+                form = 3
+                self.imul_form3(reg1, reg2, imm)
+            elif imm_size == 16:
+                form = 4
+                self.imul_form4(reg1, reg2, imm)
+            elif imm_size == 32 or imm_size == 64:
+                self.imul_form5(reg1, reg2, imm)
+            else:
+                raise AssertionError("This shouldn't happen")
+
+    def mul(self, args: List[str], arg_types: List[ArgType]):
+        argc: int = len(args)
+        if argc > 3 or argc == 0:
+            raise AssertionError("argc is wrong")
+
+        if argc == 1 and arg_types[0] == ArgType.REGISTER:
+            self.mul_form1(args[0])
+
+        if argc == 2:
+            self.mul_form2(args[0], args[1])
+
+        if argc == 3:
+            # reg, reg, imm
+            reg1 = args[0]
+            reg2 = args[1]
+            imm = Hex(args[2])
+
+            imm_size = imm.get_smallest_required_size8()
+            if imm_size == 8:
+                self.mul_form3(reg1, reg2, imm)
+            elif imm_size == 16:
+                self.mul_form4(reg1, reg2, imm)
+            elif imm_size == 32 or imm_size == 64:
+                self.mul_form5(reg1, reg2, imm)
+            else:
+                raise AssertionError("This shouldn't happen")
+
+    def imul_form1(self, reg_name: str):
         reg_size: int = self._reg_size[reg_name]
         self._last_moved_size = reg_size
 
@@ -255,7 +325,52 @@ class AsmParser:
         self.set_reg(edx_name, edx)
         self.set_reg(eax_name, eax)
 
-    def mul(self, reg_name: str):
+    def imul_form2(self, reg1_name: str, reg2_name: str):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 != 8, "second form doesn't support imul r/m8, r/m8"
+
+        reg1 = self.get_reg(reg1_name)
+        reg2 = self.get_reg(reg2_name)
+
+        _, low = Hex.imul(reg1, reg2, reg_size1)
+        self.set_reg(reg1_name, low)
+
+    def imul_form3(self, reg1_name: str, reg2_name: str, imm8: Hex):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 != 8, "second form doesn't support imul r/m8, imul r/m8"
+
+        reg2 = self.get_reg(reg2_name)
+
+        _, low = Hex.imul(reg2, imm8, reg_size1)
+        self.set_reg(reg1_name, low)
+
+    def imul_form4(self, reg1_name: str, reg2_name: str, imm16: Hex):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 == 16, "second form doesn't support imul r/m8, imul r/m8"
+
+        reg2 = self.get_reg(reg2_name)
+
+        _, low = Hex.imul(reg2, imm16, reg_size1)
+        self.set_reg(reg1_name, low)
+
+    def imul_form5(self, reg1_name: str, reg2_name: str, imm: Hex):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 == 32 or reg_size1 == 64, "second form doesn't support imul r/m8, imul r/m8"
+
+        reg2 = self.get_reg(reg2_name)
+
+        _, low = Hex.imul(reg2, imm, reg_size1)
+        self.set_reg(reg1_name, low)
+
+    def mul_form1(self, reg_name: str):
         reg_size: int = self._reg_size[reg_name]
         self._last_moved_size = reg_size
 
@@ -270,6 +385,52 @@ class AsmParser:
 
         self.set_reg(edx_name, edx)
         self.set_reg(eax_name, eax)
+
+    def mul_form2(self, reg1_name: str, reg2_name: str):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+
+        reg1 = self.get_reg(reg1_name)
+        reg2 = self.get_reg(reg2_name)
+
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 != 8, "second form doesn't support imul r/m8, imul r/m8"
+
+        high, low = Hex.mul(reg1, reg2, reg_size1)
+        self.set_reg(reg1_name, low)
+
+    def mul_form3(self, reg1_name: str, reg2_name: str, imm8: Hex):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 != 8, "second form doesn't support imul r/m8, imul r/m8"
+
+        reg2 = self.get_reg(reg2_name)
+
+        _, low = Hex.mul(reg2, imm8, reg_size1)
+        self.set_reg(reg1_name, low)
+
+    def mul_form4(self, reg1_name: str, reg2_name: str, imm16: Hex):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 == 16, "second form doesn't support imul r/m8, imul r/m8"
+
+        reg2 = self.get_reg(reg2_name)
+
+        _, low = Hex.mul(reg2, imm16, reg_size1)
+        self.set_reg(reg1_name, low)
+
+    def mul_form5(self, reg1_name: str, reg2_name: str, imm: Hex):
+        reg_size1: int = self._reg_size[reg1_name]
+        reg_size2: int = self._reg_size[reg2_name]
+        assert reg_size1 == reg_size2, "must be similar sized registers"
+        assert reg_size1 == 32 or reg_size1 == 64, "second form doesn't support imul r/m8, imul r/m8"
+
+        reg2 = self.get_reg(reg2_name)
+
+        _, low = Hex.mul(reg2, imm, reg_size1)
+        self.set_reg(reg1_name, low)
 
     def idiv(self, reg_name: str):
         reg_size: int = self._reg_size[reg_name]
@@ -298,18 +459,37 @@ class AsmParser:
         self.set_reg(reg_name, imm)
 
     def parse_line(self, line: str):
-        line = line.replace(",", "")
-        args = line.split(" ")
+        # line = line.replace(",", "")
+        args_pre = line.split(", ")
+        command_arg0 = args_pre[0]
 
-        command = args[0]
+        command, arg0 = command_arg0.split(" ")
+        args = [arg0] + args_pre[1:]
+
+        command = command.strip()
+        args = [arg.strip() for arg in args]
+
+        print(f"command = {command}, args = {args}")
+
+        argc = len(args)
+        arg_types: List[ArgType] = [ArgType.REGISTER] * argc
+        for arg_i, arg in enumerate(args):
+            if arg[0] == "0":
+                arg_types[arg_i] = ArgType.IMMEDIATE
+            elif arg[0] == "[":
+                arg_types[arg_i] = ArgType.MEMORY
+                raise NotImplementedError("Haven't implemented memory. Same for if it start with qword ptr or something else")
+            else:
+                arg_types[arg_i] = ArgType.REGISTER
+
         if command == "mov":
-            self.mov(args[1], args[2])
+            self.mov(args[0], args[1], arg_types)
 
         if command == "imul":
-            self.imul(args[1])
+            self.imul(args, arg_types)
 
         if command == "mul":
-            self.mul(args[1])
+            self.mul(args, arg_types)
 
     def parse(self, asm_code: str):
         asm_code = asm_code.strip()
@@ -325,9 +505,9 @@ if __name__ == "__main__":
 
     parser = AsmParser()
     asm_code = """
-    mov rax, 0x8C3F47BF4A90CDD5
-    mov cl, 0x07
-    mul cl
+    mov r8, 0xA98E4D28D55179B5
+    mov r11w, 0xD7
+    imul r11b, r8b
     """
 
     print(f"The asm code = {asm_code}")
@@ -338,7 +518,8 @@ if __name__ == "__main__":
     parser.print_reg("r9w")
     print("")
     parser.print_reg("edx")
-    parser.print_reg("eax")
+    parser.print_reg("r15w")
+    parser.print_reg("r11w")
 
     size = parser._last_moved_size
     if size == 64:

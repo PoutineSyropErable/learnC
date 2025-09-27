@@ -160,6 +160,22 @@ class Hex:
     def extend(self, number_bit_size: int):
         return self.adjust_size(number_bit_size, sign_extend=False)
 
+    def get_smallest_required_size8(self):
+        size = len(self.val)
+
+        if size <= 8 // Hex.BIT_COUNT:
+            imm_size = 8
+        elif size <= 16 // Hex.BIT_COUNT:
+            imm_size = 16
+        elif size <= 32 // Hex.BIT_COUNT:
+            imm_size = 32
+        elif size <= 64 // Hex.BIT_COUNT:
+            imm_size = 64
+        else:
+            raise AssertionError("should not be >64 bits")
+
+        return imm_size
+
     @staticmethod
     def concat(high: "Hex", low: "Hex") -> "Hex":
         out = Hex(high.val + low.val)
