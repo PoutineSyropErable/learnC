@@ -23,3 +23,8 @@ REP STOS:
 
 
         - Note: RDI is a callee saved register (For VS, Windows/MSVC, cl.exe). So on windows, push and pop rdi at the start and end of function.
+
+
+
+--- 
+Memcopy stuff
