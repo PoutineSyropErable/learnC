@@ -236,6 +236,13 @@ the CDQ instruction is a VS-ism. (msvc cl.exe, windows). Won't see it myself
 
 convert dword to qword. Just to make the math work out. 
 
+```asm 
+
+cdq  
+; sign extand eax into edx: eax 
+; Sometime a (cheap imperfect trick to avoid form1 of imul. imul ebx)
+```
+
 
 
 

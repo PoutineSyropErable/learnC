@@ -1,0 +1,29 @@
+	.file	"memset.c"
+	.intel_syntax noprefix
+	.text
+	.section	.text.startup,"ax",@progbits
+	.p2align 4
+	.globl	main
+	.type	main, @function
+main:
+	push	rbx
+	mov	rbx, rsi ; Make a copy of rsi. Into callee saved register. So it save information
+
+	; rdi: arg1 ; argc 
+	; rsi: arg2 ; argv
+
+	mov	rdi, QWORD PTR 8[rsi] ; argv[1] 
+	mov	edx, 10 ; arg3 10
+	xor	esi, esi ; arg2 0
+	call	__isoc23_strtol@PLT ; strtol(argv[1], NULL, 10);
+
+	mov	rdi, QWORD PTR 16[rbx] ; argv[2]
+	mov	edx, 10
+	xor	esi, esi
+	call	__isoc23_strtol@PLT
+	xor	eax, eax
+	pop	rbx
+	ret
+	.size	main, .-main
+	.ident	"GCC: (GNU) 15.2.1 20250813"
+	.section	.note.GNU-stack,"",@progbits
