@@ -138,6 +138,18 @@ call   main+0xf23
     - In this form, the instruction is written as `ret 0x08` or `ret 0x20`, etc. 
 
 
+--- 
+--- 
+
+# MOV - move a value 
+
+- Arg1 is r/mX 
+- Arg2 is r/mX or immediate. 
+
+Writes to a 32 bit value zeros the upper half. 
+Writes to a 16 or 8 bit register only touches that part, the upper bits are unchanged
+
+
 ---- 
 ---- 
 # INTEL (Nasm) vs AT&T (GAS): 

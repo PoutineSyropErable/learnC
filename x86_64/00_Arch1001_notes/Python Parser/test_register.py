@@ -28,6 +28,8 @@ def test_register_set():
 
     # --- Test 16-bit write ---
     parser.set_reg("ax", Hex("1234"))
+    parser.print_reg("ax")
+    parser.print_reg("rax")
     assert parser._registers["rax"].val.endswith("0000000000001234"), "rax after ax"
     assert parser._registers["ax"].val.endswith("1234"), "ax wrong"
     assert parser._registers["al"].val.endswith("34"), "al wrong"
@@ -64,6 +66,19 @@ def test_register_set():
     print("All register set tests passed!")
 
 
+def test_register_set_small():
+    # --- Test 16-bit write ---
+    parser = AsmParser()
+    parser.set_reg("ax", Hex("1234"))
+    parser.print_reg("ax")
+    parser.print_reg("rax")
+    assert parser._registers["rax"].val.endswith("0000000000001234"), "rax after ax"
+    assert parser._registers["ax"].val.endswith("1234"), "ax wrong"
+    assert parser._registers["al"].val.endswith("34"), "al wrong"
+    assert parser._registers["ah"].val.endswith("12"), "ah wrong"
+
+
 if __name__ == "__main__":
     print("\n==start of program==\n")
+    # test_register_set_small()
     test_register_set()

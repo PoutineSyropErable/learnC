@@ -181,11 +181,14 @@ class Hex:
         out = Hex(high.val + low.val)
         return out
 
-    def split(self, number_bit_size: int) -> Tuple["Hex", "Hex"]:
+    def split_se(self, number_bit_size: int) -> Tuple["Hex", "Hex"]:
         """
         Split a larger hex value into two halves like high:low (e.g., edx:eax).
         Works for any multiple-of-4 bit size.
         Returns (high, low) as new Hex objects.
+
+        Note: This does sign extension
+        number_bit_size: The output size
         """
         assert number_bit_size % Hex.BIT_COUNT == 0, "must be a hex representable"
 
@@ -226,6 +229,93 @@ class Hex:
         low_hex = Hex.int_to_hex(int(low_val_str, Hex.BASE))
 
         return high_hex, low_hex
+
+    def split_assert(self, number_bit_size: int) -> Tuple["Hex", "Hex"]:
+        """
+        Split into halve sizes, and assert that the hex already are the perfect half sizes
+        """
+        smaller_hex_size = number_bit_size // Hex.BIT_COUNT
+        assert number_bit_size % Hex.BIT_COUNT == 0, "must be a hex representable"
+        assert len(self.val) == 2 * smaller_hex_size
+
+        half_len = smaller_hex_size
+
+        high_val_str = self.val[:half_len]
+        low_val_str = self.val[half_len:]
+        return Hex(high_val_str), Hex(low_val_str)
+
+    def split_e(self, number_bit_size: int) -> Tuple["Hex", "Hex"]:
+        """
+        Split a larger hex value into two halves like high:low (e.g., edx:eax).
+        Works for any multiple-of-4 bit size.
+        Returns (high, low) as new Hex objects.
+
+        number_bit_size: The output size
+        """
+        assert number_bit_size % Hex.BIT_COUNT == 0, "must be a hex representable"
+
+        # high:low = (number_bit_size, number_bit_size)
+        hex_digits_needed = number_bit_size * 2 // Hex.BIT_COUNT
+        current_len = len(self.val)
+
+        # Determine the padding character if sign extension is needed
+        extend_char = "0"
+
+        # Check if we need to pad or truncate
+        if current_len < hex_digits_needed:
+            # Compute how many digits we need to add
+            digits_to_add = hex_digits_needed - current_len
+
+            # Build the padding string using the sign-extend character
+            padding_str = extend_char * digits_to_add
+
+            # Prepend the padding to the current value
+            padded_val = padding_str + self.val
+        else:
+            # If current value is longer than needed, truncate the extra most significant digits
+            # example, we want to split a 140 bit number into two 64 bit number.
+            # we must truncate the 12 leftmost bit. (140 - 128)
+            start_index = current_len - hex_digits_needed
+            padded_val = self.val[start_index:]
+
+        half_len = hex_digits_needed // 2
+
+        high_val_str = padded_val[:half_len]
+        low_val_str = padded_val[half_len:]
+
+        high_hex = Hex.int_to_hex(int(high_val_str, Hex.BASE))
+        low_hex = Hex.int_to_hex(int(low_val_str, Hex.BASE))
+
+        return high_hex, low_hex
+
+    def set_right_hex(self, left_hex: "Hex", bit_change_count: int):
+        assert bit_change_count % Hex.BIT_COUNT == 0, "must be a hex representable"
+        hex_change_count = bit_change_count // Hex.BIT_COUNT
+        assert len(left_hex.val) == hex_change_count, f"hex: {left_hex} has {len(left_hex.val)} numbers, we are changing {hex_change_count}"
+        current_len = len(self.val)
+        assert current_len > hex_change_count, f"hex: {left_hex} has {len(left_hex.val)} numbers, we are changing {hex_change_count}"
+
+        val_modifiable = list(self.val)
+        start_pos = current_len - hex_change_count
+        # Replace the rightmost portion
+        for i in range(hex_change_count):
+            val_modifiable[start_pos + i] = left_hex.val[i]
+
+        val_modified = "".join(val_modifiable)
+        self.val = val_modified
+
+    def set_right_hex_new(self, left_hex: "Hex", hex_change_count: int) -> "Hex":
+        assert len(left_hex.val) == hex_change_count
+        current_len = len(self.val)
+        assert current_len > hex_change_count
+
+        val_modifiable = self.val.split()
+        diff = current_len - hex_change_count
+        for i in range(diff, hex_change_count, 1):
+            val_modifiable[i] = left_hex.val[i - diff]
+
+        val_modified = "".join(val_modifiable)
+        return Hex(val_modified)
 
     def ones_complement(self, width_bits: int | None = None) -> "Hex":
         """
@@ -276,7 +366,7 @@ class Hex:
 
         res_hex = Hex.int_to_hex(res, number_bit_size * 2)
         print(f"Result hex (internal)= {res_hex}\n")
-        high_hex, low_hex = res_hex.split(number_bit_size)
+        high_hex, low_hex = res_hex.split_se(number_bit_size)
         print("\n====== End of imul =======\n")
         return high_hex, low_hex
 
@@ -299,7 +389,7 @@ class Hex:
 
         res_hex = Hex.int_to_hex(res, number_bit_size * 2)
         print(f"Result hex = {res_hex}\n")
-        high_hex, low_hex = res_hex.split(number_bit_size)
+        high_hex, low_hex = res_hex.split_se(number_bit_size)
         print("\n====== End of Mul =======\n")
         return high_hex, low_hex
 
@@ -404,7 +494,7 @@ if __name__ == "__main__":
 
         print(f"-merged = {merged}")
 
-        high, low = Hex.split(merged, 32)
+        high, low = Hex.split_se(merged, 32)
         # result new =  0x7d 45f7 d323 2e5e
 
     elif METHOD == 3:
@@ -429,7 +519,7 @@ if __name__ == "__main__":
         print(f"rax_i = {rax_i}")
         print(f"res_i = {res_i}")
         res_hex = Hex.int_to_hex(res_i, 32 * 2)
-        high, low = res_hex.split(32)
+        high, low = res_hex.split_se(32)
 
     else:
         raise AssertionError("")

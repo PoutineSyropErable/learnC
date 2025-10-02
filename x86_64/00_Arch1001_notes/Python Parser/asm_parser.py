@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Tuple
 from internal_hex import Hex
 from enum import Enum
 
@@ -33,18 +33,21 @@ class AsmParser:
         self.reg8 = ["al", "bl", "cl", "dl", "ah", "bh", "ch", "dh", "sil", "dil", "bpl", "spl"]
         self.reg8 += ["r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b"]
 
-        # Initialize all registers to 0
-        self._registers = {}
-        for reg in self.reg64 + self.reg32 + self.reg16 + self.reg8:
-            self._registers[reg] = Hex("0")
-
-            # Register sizes in bits
+        # Register sizes in bits
         self._reg_size = {
             **{r: 64 for r in self.reg64},
             **{r: 32 for r in self.reg32},
             **{r: 16 for r in self.reg16},
             **{r: 8 for r in self.reg8},
         }
+
+        # Initialize all registers to 0
+        self._registers: Dict[str, Hex] = {}
+        for reg in self.reg64 + self.reg32 + self.reg16 + self.reg8:
+            reg_size = self._reg_size[reg]
+            zero_count = reg_size // Hex.BIT_COUNT
+            assert reg_size % Hex.BIT_COUNT == 0
+            self._registers[reg] = Hex("0" * zero_count)
 
         # Define alias mapping for shared access
         self._input_to_64 = {
@@ -170,8 +173,206 @@ class AsmParser:
     def get_high(self, bits: int):
         return self._high_dict[bits]
 
+    def get_left_half(self, reg_name: str):
+        """
+        This method is to get the innacessible left half for the next higher version.
+        The lefthalf of al is ah.
+        the lefthalf of ax, is the 16 rightmost bits of eax.
+
+        rax
+        left | (  eax   )
+                left| ( ax    )
+                        left|al
+        """
+        size = self._reg_size[reg_name]
+        assert size != 64, "No 128 bit support"
+        assert reg_name[-1] != "h", "Should not use this for *h (ie ah, bh, ch, dh). "
+
+        base64 = self._input_to_64[reg_name]
+        alias_names = [k for k, v in self._input_to_64.items() if v == base64]
+        alias_sizes = [self._reg_size[alias_name] for alias_name in alias_names]
+
+        alias_map = {size: name for size, name in zip(alias_sizes, alias_names)}
+        print(alias_names)
+        print(alias_sizes)
+        print(alias_map)
+
+        if reg_name[-1] == "l":
+            reg16_name = alias_map[16]
+            reg16 = self.get_reg(reg16_name)
+            left, right = reg16.split_e(8)
+            return left
+
+        size_bigger = size * 2
+        reg_bigger_name = alias_map[size_bigger]
+        reg_bigger = self.get_reg(reg_bigger_name)
+        left, right = reg_bigger.split_e(size)
+        return left
+
+    def get_left_bits(self, reg_name: str, reg_bigger_size):
+        """
+        This method is to get the innacessible left side for the next higher version.
+
+        so. If we have al
+        and we give it a bigger_reg_size=64
+
+        rax = 64 version.
+
+        al = 2 Hex.
+        rax = 16 Hex
+        14Hex | 2 Hex
+        we return the 14 Hex
+
+        ===
+        Example:
+        we ask for 32.
+        give al
+        eax= 32 = 8 hex
+        6 Hex| 2 Hex
+
+        if eax=OxFFDDEE12
+        we give it regname=al. (it's value is 12)
+        output is
+        FFDDEE
+        """
+        assert reg_bigger_size in [16, 32, 64], "must be a real register size"
+
+        if reg_name[-1] == "h":
+            assert reg_name in ["ah", "bh", "ch", "dh"], "other with h don't exist"
+            # Then we pretty much want want's left of ax.
+            reg_name = reg_name.replace("h", "x")
+
+        size = self._reg_size[reg_name]
+        assert size != 64, "No 128 bit support"
+
+        base64_name = self._input_to_64[reg_name]
+        alias_names = [k for k, v in self._input_to_64.items() if v == base64_name]
+        alias_sizes = [self._reg_size[alias_name] for alias_name in alias_names]
+
+        alias_map = {size: name for size, name in zip(alias_sizes, alias_names)}
+
+        reg_bigger_name = alias_map[reg_bigger_size]
+        reg_bigger_value = self.get_reg(reg_bigger_name)
+        number_of_hex = len(reg_bigger_value.val)
+        size_hex = size // Hex.BIT_COUNT
+        diff = number_of_hex - size_hex
+
+        left_val: str = reg_bigger_value.val[0:diff]
+        left_val_hex = Hex(left_val)
+        return left_val_hex
+
+    def get_high8_low_8_names(self, name_8: str) -> Tuple[str, str]:
+
+        assert name_8 in ["ah", "al", "bh", "bl", "ch", "cl", "ch", "dl"]
+        # must use list(name_8), not name_8.split() split cant take a "" separator. and defualt is space
+        # and if we list, we can then just str
+
+        start = name_8[0]
+        name_8h = start + "h"
+        name_8l = start + "l"
+
+        return name_8h, name_8l
+
+    def has_high_8(self, reg_name: str):
+        base64 = self._input_to_64[reg_name]
+        return base64 in ["rax", "rbx", "rcx", "rdx"]
+
+    def set_reg(self, reg_name: str, hex_imm: Hex):
+        if reg_name not in self._input_to_64:
+            raise ValueError(f"Unknown register: {reg_name}")
+
+        base64 = self._input_to_64[reg_name]
+        size = self._reg_size[reg_name]
+        alias_names = [k for k, v in self._input_to_64.items() if v == base64]
+        alias_sizes = [self._reg_size[alias_name] for alias_name in alias_names]
+        alias_map = {size: name for size, name in zip(alias_sizes, alias_names)}
+
+        name_8 = alias_map[8]  # ends with l
+        name_16 = alias_map[16]
+        name_32 = alias_map[32]
+        name_64 = alias_map[64]
+
+        if size == 32 or size == 64:
+            self._registers[name_16] = hex_imm.extend(16)
+            self._registers[name_32] = hex_imm.extend(32)
+            self._registers[name_64] = hex_imm.extend(64)
+
+            if not self.has_high_8(reg_name):
+                self._registers[name_8] = hex_imm.extend(8)
+            else:
+                name_8h, name_8l = self.get_high8_low_8_names(name_8)
+
+                val_16 = self._registers[name_16]
+                high_8, low_8 = val_16.split_assert(8)
+
+                self._registers[name_8l] = low_8
+                self._registers[name_8h] = high_8
+        elif size == 16:
+            print("size = 16")
+            if not self.has_high_8(reg_name):
+                print("doesnt have high8")
+                new_ax = hex_imm.extend(16)
+
+                _, low_8 = new_ax.split_assert(8)
+                self._registers[name_8] = low_8
+
+                self._registers[name_16] = new_ax
+                self._registers[name_32].set_right_hex(new_ax, 16)
+                self._registers[name_64].set_right_hex(new_ax, 16)
+
+            else:
+                print("have high8")
+                new_ax = hex_imm.extend(16)
+                print(f"new ax = {new_ax}")
+
+                high_8, low_8 = new_ax.split_assert(8)
+                name_8h, name_8l = self.get_high8_low_8_names(name_8)
+                self._registers[name_8l] = low_8
+                self._registers[name_8h] = high_8
+
+                print(f"name_64 = {name_64}")
+                self._registers[name_16] = new_ax
+                self._registers[name_32].set_right_hex(new_ax, 16)
+                self._registers[name_64].set_right_hex(new_ax, 16)
+                print(f"64 = {self._registers[name_64]}")
+                print(f"32 = {self._registers[name_32]}")
+
+        elif size == 8:
+            if reg_name[-1] == "h":
+                if self.has_high_8(reg_name):
+                    # don't modify al
+                    # modify ax, eax, rah
+                    name_8h, name_8l = self.get_high8_low_8_names(name_8)
+
+                    new_ah = hex_imm.extend(8)
+                    self._registers[name_8h] = new_ah
+
+                    current_al = self._registers[name_8l]
+                    new_ax = Hex.concat(new_ah, current_al).extend(16)
+
+                    self._registers[name_16] = new_ax
+                    self._registers[name_32].set_right_hex(new_ax, 16)
+                    self._registers[name_64].set_right_hex(new_ax, 16)
+
+                else:
+                    raise AssertionError("This should never happen")
+
+            elif reg_name[-1] == "l":
+                # don't modify ah
+                # modify ax, eax, rax
+                new_al = hex_imm.extend(8)
+                self._registers[name_16].set_right_hex(new_al, 8)
+                self._registers[name_32].set_right_hex(new_al, 8)
+                self._registers[name_64].set_right_hex(new_al, 8)
+            else:
+                raise AssertionError("This should never happen")
+
+            return
+        else:
+            raise AssertionError("Should never happen")
+
     # ========
-    def set_reg(self, name: str, hex_imm: Hex):
+    def set_reg_old(self, name: str, hex_imm: Hex):
         """Set a register via any alias, updating the full familly. Doesn't sign extend. This is a mov internal."""
         if name not in self._input_to_64:
             raise ValueError(f"Unknown register: {name}")
@@ -216,7 +417,7 @@ class AsmParser:
             # we are modifying a variant which have an ax/al type register
             print(f"Case: {base64}, {size} (setting a big)")
             hex16 = hex_imm.extend(16)
-            high_8, low_8 = hex16.split(8)
+            high_8, low_8 = hex16.split_se(8)
             print(f"high_8 = {high_8}, low_8 = {low_8}")
             for alias_name, alias_size in zip(alias_names, alias_sizes):
                 if alias_name[-1] == "h":
@@ -241,7 +442,7 @@ class AsmParser:
         return self._registers[name].copy()
 
     def print_reg(self, reg_name: str):
-        reg = parser.get_reg(reg_name)
+        reg = self.get_reg(reg_name)
         print(f"{reg_name} = {reg}")
 
     # ========
@@ -505,14 +706,19 @@ if __name__ == "__main__":
 
     parser = AsmParser()
     asm_code = """
-    mov r8, 0xA98E4D28D55179B5
-    mov r11w, 0xD7
-    imul r11b, r8b
+    mov rax, 0xA98E4DD55179B5
     """
 
     print(f"The asm code = {asm_code}")
 
+    print("")
     parser.parse(asm_code)
+    parser.print_reg("rax")
+    parser.print_reg("eax")
+    parser.print_reg("ax")
+    parser.print_reg("ah")
+    parser.print_reg("al")
+    exit(0)
     print("\n====== End of parsing ======\n")
     parser.print_reg("rax")
     parser.print_reg("r9w")

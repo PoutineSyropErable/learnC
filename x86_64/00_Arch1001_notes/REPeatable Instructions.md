@@ -1,4 +1,5 @@
-REP STOS: 
+# REP STOS: 
+- Effectively a memset
 
 *Rep*eat *Sto*re *S*tring
 
@@ -19,7 +20,6 @@ REP STOS:
 - Set *di to the start destination 
 - set *ax/al to the value to store. 
 - set *cx to the number of time to store
-    - Effectively a memset
 
 
         - Note: RDI is a callee saved register (For VS, Windows/MSVC, cl.exe). So on windows, push and pop rdi at the start and end of function.
@@ -33,6 +33,7 @@ void rep_stos_q(void* destination, long value, long count) {
 	long rax = value;
 	long rcx = count;
 	asm("rep stosq");
+    // Note this is imperfect embedded asm style. 
 
 }
 
@@ -54,11 +55,10 @@ rep stosq
 
 
 --- 
-Memcopy stuff
+# REP MOVS: 
 
-MEmcopy moves from one to another. So it would use rep movs 
+- Effectively a memcpy
 
-REP MOVS: 
 *REP*eat *Mov*e Data String to *s*tring
 
 - MOVS can have the rep prefix added to it, which repeats it multiple time. 
@@ -77,16 +77,25 @@ It moves 1,2,4 or 8 bytes at a time.
     - set *cx to the number of time to store
 
 
+- MOVS is not MOV. It's a difference instruction
+- This has implication for callee and caller saved instructions
+    - In GCC (Linux/System V): RSI and RDI are caller saved. (No extra instructions needed)
+    - In CL (Windows/VS/ MSVC \[*M*icro*s*oft *v*isual *C*++]): RSI and RDI are callee saved (need to push and pop them before and after) 
+
+
+
 
 ```c 
 void rep_movs_q(void* destination, void* source, long count) {
 
 
-	void* rdi = destination;
-	void* rsi = source;
-	long rcx = count;
+	void* rdi = destination;    // Also Arg1
+	void* rsi = source;         // Also Arg2 
+	long rcx = count;           // Also Arg4 (Note that RDX = Arg3 is skipped. )
 	__asm__("rep movsq");
+    // Note this is imperfect asm style. 
 
+}
 
 ```
 
@@ -100,3 +109,14 @@ mov rsi, [source_array_symbol]
 mov rcx, count 
 rep movsq
 ```
+
+
+
+
+---
+# The direction flag. (DF): 
+- Type C: Control Flag 
+
+change the direction of a rep movs or a rep stos. 
+Either increasing (forward in the array) (Increment rdi/rsi) 
+or decreasing (backward in the array)    (Decrement rdi/rsi)

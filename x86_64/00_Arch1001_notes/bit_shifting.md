@@ -10,10 +10,13 @@ Search headers:
 
 ----
 
+# LOGICAL Shifts: 
 # SHL, SHR: Logical Shift Left/Right. 
-Unsigned. Adds zeros
 
-## SHL - Shift Logical Left : 
+- Unsigned. Adds zeros
+
+---
+## SHL - Shift Logical Left :  (Ends up same as SAL)
 For unsigned values. Or just pure litteal bit shifting
 \<\< in C. 
 
@@ -57,7 +60,7 @@ shl eax, cl
 
 
 
-
+---
 ## SHR: Shift Logical Right 
 For unsigned values. Or just pure litteral bit shifting
 \>\> in C. 
@@ -96,8 +99,15 @@ shr eax, cl
 
 ```
 
+-----
+------
 ---
-# SAL - Shift Arithmetic Left
+# ARITHMETIC shifts: 
+# SAL/SAR - Shift Arithmetic Left/Right
+
+- Signed. Adds 0s or 1s. 1s if leftmost >=0x8 (1000)
+---
+## SAL - Shift Arithmetic Left (ends up same SHL)
 For signed values  (Multiplication)
 \<\< in C
 
@@ -111,10 +121,8 @@ The gcc -s partial compiling (or just regular compiling, not compile + assemble)
 However, 
 The object files dissassembly (object dump/objdump) will use SHL. 
 
------
-------
 ---
-# SAR - Shift Arithmetic Right  
+## SAR - Shift Arithmetic Right  
 For signed values (Division toward -infinity. )
 \>\> in C    
 
@@ -133,7 +141,7 @@ Second operand: cl (lowest byte of rcx) or a 1 byte immediate.
 
 Note that this divide toward -infinity. 
 Positive numbers are rounded down (smaller abs value)
-Negative numbers are rounded down/"up" (higher abs value)  {Officially, it rounds down. "up" is a dumb me thing. hence the ""}
+Negative numbers are rounded down/"up" (higher abs value)  {Officially, it rounds down. "up" is a dumb me thing for abs value. hence the ""}
 
 ```asm
 
@@ -335,4 +343,33 @@ shr al, 1
 
 ```
 
-***
+
+
+
+---
+# Exercise: 
+
+
+```asm 
+
+mov r12d, 0xD84F7AA1
+sar r12d, 0x20
+; r12d dword = 32 bits. 
+; = 8 hex. It fits. No truncation
+; Otherwise, keep only the rightmost hex (least significant)
+; Note, that writting to a smaller register doesn't set the bigger one to 0s. 
+
+
+; What value is in r12d after this code executes?
+; Enter it in hex, with or without the '0x'.
+
+0x20 = 32. 
+1 hex = 4 bits. 
+32 bits = 8 hex
+
+shift arithmetic right ->. 
+D > 8: Sign is negative 
+(leftmost hex)
+0xFFFF FFFF _D84F7AA1
+0xFFFFFFFFD84F7AA1
+```
