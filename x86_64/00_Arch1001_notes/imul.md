@@ -298,7 +298,50 @@ unsigned_AX = AX & 0xFFFF   # Mask to 16-bit unsigned
 
 ```
 
+---
+# Practical forms
 
+
+imul has 3 forms practically. 
+
+
+``` asm
+# ==== Form 1
+imul r/mX    | High:Low = Low * r/mX
+High:Low = (AX=AH:AL), DX:AX, EDX:EAX, RDX:RAX 
+
+# example
+mov al, 5
+mov bl, 3
+imul bl         ; AX = AL * BL = 15
+
+
+#====== Form 2  
+imul rX1, r/mX2 : rX1 *= r/mX2 
+
+
+# example
+mov ax, 5        ; rX 
+mov bx, 3        ; r/mX
+imul ax, bx      ; AX = AX * BX = 15 (truncated to 16 bits)
+
+
+
+# ========= Form 3: (Only form with immediate and no need for backups before)
+imul rX1, r/mX2, immX   | rX1 = r/mX2 * immX
+
+# example
+mov ebx 3 
+imul eax, ebx, 5 
+# Third argument must be a immX, not an r/mX
+
+
+
+
+
+```
+
+Look through the previous notes for more detail
 
 --- 
 # Exercise 

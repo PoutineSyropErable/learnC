@@ -140,14 +140,27 @@ Sign-extend a 32-bit signed value into a 64-bit register.
 ```
 
 - Note that like with movzx, a movsx reg64, r/m32.  will cause a crash
+- This instruction was added for historical reason. Since movsx didn't have support for 32 bit. So it's opcode and size couldn't be changed, as that would break existing code
 
 
 
 
+----
+# instruction specific versions 
 
 
 
+```asm
 
+movsxd rdx, eax  # d because movsx rdx, eax implies a register bigger then 32 bit exist. 
+# and as there were no 32 bit version. And there were no extra bits left, and no possible free configuration of it
+
+movsx?, dest, source 
+
+# The size of the source is the one used for _b, _w, _d, _q  
+
+movzxw eax, bx 
+```
 
 
 

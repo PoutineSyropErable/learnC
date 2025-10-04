@@ -27,6 +27,8 @@ and al 0x42
 destination and source can be r/mX or register. 
 source can also be an immediate
 
+:AND instruction, AND INSTRUCTION, and instruction
+
 ---
 # or: boolean or operator
 bitwise OR operation
@@ -40,6 +42,7 @@ or eax, ebx
 
 ```
 
+:OR instruction, OR INSTRUCTION, OR instruction
 
 ---
 # xor: boolean or operator
@@ -63,11 +66,7 @@ xor eax, ebx
 ```
 
 
-
-
-
-
-
+:XOR instruction, XOR INSTRUCTION, XOR instruction
 
 ---
 NOT - One's complement negation. 
@@ -84,6 +83,7 @@ not eax
 
 ```
 
+:NOT instruction. not instruction. NOT INSTRUCTION. 
 
 1's complement is : `not x`
 2's complement is : `(not x) +1`
