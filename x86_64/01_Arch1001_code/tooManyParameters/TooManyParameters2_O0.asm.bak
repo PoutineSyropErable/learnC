@@ -1,0 +1,42 @@
+
+TooManyParameters2.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <func>:
+   0:	55                   	push   rbp
+   1:	48 89 e5             	mov    rbp,rsp
+   4:	89 7d ec             	mov    DWORD PTR [rbp-0x14],edi
+   7:	89 75 e8             	mov    DWORD PTR [rbp-0x18],esi
+   a:	89 55 e4             	mov    DWORD PTR [rbp-0x1c],edx
+   d:	89 4d e0             	mov    DWORD PTR [rbp-0x20],ecx
+  10:	44 89 45 dc          	mov    DWORD PTR [rbp-0x24],r8d
+  14:	44 89 4d d8          	mov    DWORD PTR [rbp-0x28],r9d
+  18:	8b 55 ec             	mov    edx,DWORD PTR [rbp-0x14]
+  1b:	8b 45 e8             	mov    eax,DWORD PTR [rbp-0x18]
+  1e:	01 d0                	add    eax,edx
+  20:	2b 45 e4             	sub    eax,DWORD PTR [rbp-0x1c]
+  23:	89 c2                	mov    edx,eax
+  25:	8b 45 e0             	mov    eax,DWORD PTR [rbp-0x20]
+  28:	01 d0                	add    eax,edx
+  2a:	2b 45 dc             	sub    eax,DWORD PTR [rbp-0x24]
+  2d:	89 45 fc             	mov    DWORD PTR [rbp-0x4],eax
+  30:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+  33:	5d                   	pop    rbp
+  34:	c3                   	ret
+
+0000000000000035 <main>:
+  35:	55                   	push   rbp
+  36:	48 89 e5             	mov    rbp,rsp
+  39:	6a 77                	push   0x77
+  3b:	41 b9 66 00 00 00    	mov    r9d,0x66
+  41:	41 b8 55 00 00 00    	mov    r8d,0x55
+  47:	b9 44 00 00 00       	mov    ecx,0x44
+  4c:	ba 33 00 00 00       	mov    edx,0x33
+  51:	be 22 00 00 00       	mov    esi,0x22
+  56:	bf 11 00 00 00       	mov    edi,0x11
+  5b:	e8 00 00 00 00       	call   60 <main+0x2b>
+  60:	48 83 c4 08          	add    rsp,0x8
+  64:	c9                   	leave
+  65:	c3                   	ret

@@ -44,3 +44,28 @@ This area is known as the red zone.
 Page 5
 
 "https://www.google.com"
+
+
+--- 
+# ArrayLocalVariable. 
+
+"/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/arch1001_x86-64_asm_slides_and_subtitles/13_Linux_Assembly_Examples/_Arch1001_13_Linux_19_ArrayLocalVariable2.pdf"
+
+
+
+---
+# AS - GNU Assembler. 
+
+```bash
+as input.s -o output.o     # Assemble input.s into object file
+ld output.o -o program     # Link object file into executable
+
+```
+
+or gcc to do both at once
+```bash
+gcc input.s -o program 
+```
+
+
+https://sourceware.org/binutils/docs/as/i386_002dMnemonics.html
