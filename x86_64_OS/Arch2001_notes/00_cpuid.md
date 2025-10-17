@@ -1,3 +1,13 @@
+# Meta. Stuff about the slides
+
+0xff0000 red star = kernel level (ring 0 priviledge instruction)
+0xffff00 yellow star = userland level (any ring priviledge instruction)
+
+
+
+----
+
+
 
 # CPUID 
 

@@ -67,7 +67,8 @@ AMD have their own Finite State Machine diagram, and it's better looking
 AMD (Should be the same thing, just again)
 
 - Start in Real Mode. (16 bits) 
-    - Set CR0.PE =1  -> Go to Protected Mode. 
+    - Must setup the GDT 
+    - Set CR0.PE =1  -> Go to Protected Mode.    (PE = Protection Enable)
 
 - In protected mode ( 32 bit)
     - Set EFER.LME=1, CR4.PAE=1 then CR0.PG=1 -> Compatibility mode. 

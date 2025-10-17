@@ -79,3 +79,7 @@ Bit 20: Execute Disable bit available
 Bit 29: Intel 64 Architecture available if 1
 (in EDX, output of CPUID)
 
+
+
+--- 
+To fully undersand priviledge bits, we need to learn about segmentation
