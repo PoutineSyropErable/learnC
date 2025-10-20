@@ -53,21 +53,6 @@ segment in the linear address space (called the base address of the segment).”
 +--------------------------------------------------------------------------------------------------+
 ```
 
-So, bit 31-24 are the (21-34 bit of the base address)
-bit 7-0 are the 23-16 bit of the base address. 
-Lower: Bit 31-
-
-The upper 32 bits of the Segment descriptor. And the lower 32 bit of the segment descriptor. 
-So, it's 
-```c
-struct SegmentDescriptor {
-    uint32_t lower; // Base: 15-0: 
-    uint32_t upper; // base: 31-24, 23-16
-
-    // order lower first because little endian
-}
-
-```
 
 ***Field Descriptions***
 
@@ -79,8 +64,24 @@ struct SegmentDescriptor {
 - **LIMIT** — Segment Limit  
 - **P** — Segment present  
 - **DPL** — Descriptor privilege level  
-- **S** — Descriptor type (0 = system; 1 = code or data)  
 - **TYPE** — Segment type  
+- **S** — Descriptor type (0 = system; 1 = code or data)  
+
+```c
+struct SegmentDescriptor {
+    uint32_t lower; // Base: 15-0: 
+    uint32_t upper; // base: 31-24, 23-16
+    // order lower first because little endian
+}
+
+```
+
+
+So, bit 31-24 are the (21-34 bit of the base address)
+bit 7-0 are the 23-16 bit of the base address. 
+Lower: Bit 31-
+
+The upper 32 bits of the Segment descriptor. And the lower 32 bit of the segment descriptor. 
 
 ***Figure 3-8. Segment Descriptor***
 
@@ -101,3 +102,18 @@ CS.L = 1 : 64 bit mode
 CS.L = 0: Compatibility Mode. 
 
 Code Segment.Long Mode Flag
+
+
+--- 
+Since the base is a 32 bit address, we have an issue. 
+So for 64 bit mode, we can't use the base in the segment descriptor. 
+
+So, for CS, SS, DS, ES, the base is set to 0. 
+
+And for FS and GS, they use a MSR (Model specific register): IA\_32\_FSBASE and IA\_32\_GSBASE
+
+
+--- 
+# Segment Limit
+Limit: 20 Bit value. Size of the segement (in bytes, or 4kb blocks), for compatibility mode. 
+Limits are not actually checked anymore in 64 bit mode, even for FS and GS

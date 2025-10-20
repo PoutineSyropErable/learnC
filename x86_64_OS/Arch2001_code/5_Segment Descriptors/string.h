@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 char* getSpacelessBitString(uint32_t a);

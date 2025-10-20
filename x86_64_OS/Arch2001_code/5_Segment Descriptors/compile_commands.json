@@ -1,0 +1,38 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "build/binary_operation.o",
+      "binary_operation.c"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/binary_operation.c",
+    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/binary_operation.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "build/string.o",
+      "string.c"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/string.c",
+    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/string.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "build/descriptors.o",
+      "descriptors.c"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/descriptors.c",
+    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/descriptors.o"
+  }
+]
