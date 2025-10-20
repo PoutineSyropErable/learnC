@@ -35,13 +35,89 @@ struct SDIndex* baseAddressIndices() {
 	return val; // return pointer to static array
 }
 
-uint32_t generateMask(uint8_t endBig, uint32_t startSmall) {
+char* getSpacelessBitString(uint32_t a) {
+	char* print_string = (char*)malloc(33);
+	print_string[32] = 0;
 
-	uint32_t mask_plus_one = 1 << (endBig - startSmall + 1);
-	uint32_t mask = mask_plus_one - 1;
+	for (uint8_t bitIndex = 0; bitIndex < 32; bitIndex++) {
+		uint8_t c = a >> bitIndex & 1;
+		print_string[(32 - 1) - bitIndex] = '0' + (char)c;
+	}
+
+	return print_string;
+}
+
+char* addSpacesEvery4bits(char* spacelessBits) {
+	char* print_str = malloc(40);
+
+	uint8_t bitIndex = 0;   // for the spacelessBits[bitIndex]
+	uint8_t printIndex = 0; // for print_str[printIndex]
+	while (printIndex < 39) {
+
+		if ((printIndex + 1) % 5 == 0) {
+
+			print_str[printIndex] = ' ';
+		} else {
+			print_str[printIndex] = spacelessBits[bitIndex];
+
+			bitIndex++;
+		}
+
+		printIndex++;
+	}
+
+	print_str[39] = '\0';
+	return print_str;
+}
+
+void print_separeted_by_4(char* bitString) {
+	char* spaceSeparatedBits = addSpacesEvery4bits(bitString);
+	printf("%s\n", spaceSeparatedBits);
+	free(spaceSeparatedBits);
+}
+
+char* binaryNumberToString(uint32_t binaryNumber) {
+	char* simpleBitString = getSpacelessBitString(binaryNumber);
+	char* spaceSeparatedBits = addSpacesEvery4bits(simpleBitString);
+	free(simpleBitString);
+	return spaceSeparatedBits;
+}
+
+static inline void ps4(uint32_t binaryNumber) {
+	char* spacelessBitString = getSpacelessBitString(binaryNumber);
+	char* spaceSeparatedBits = addSpacesEvery4bits(spacelessBitString);
+	printf("%s\n", spaceSeparatedBits);
+	free(spaceSeparatedBits);
+	free(spacelessBitString);
+}
+
+static inline void printBinary(uint32_t binaryNumber, char* variableName) {
+	char* spacelessBitString = getSpacelessBitString(binaryNumber);
+	char* spaceSeparatedBits = addSpacesEvery4bits(spacelessBitString);
+	printf("%s = %s = %x\n", variableName, spaceSeparatedBits, binaryNumber);
+	free(spaceSeparatedBits);
+	free(spacelessBitString);
+}
+
+uint32_t generateMask(uint8_t endBig, uint8_t startSmall) {
+
+	uint8_t width = endBig - startSmall + 1;
+
+	uint32_t mask;
+	if (width >= 32) {
+		mask = 0xFFFFFFFF;
+	} else {
+		uint32_t mask_plus_one = 1 << (endBig - startSmall + 1);
+		mask = mask_plus_one - 1;
+	}
 
 	uint32_t mask_left = mask << startSmall;
 	return mask_left;
+}
+
+uint32_t generateAntiMask(uint8_t endBig, uint8_t startSmall) {
+
+	return ~generateMask(endBig, startSmall);
 }
 
 uint32_t getBits2(uint32_t value, uint8_t endBig, uint8_t startSmall) {
@@ -65,38 +141,56 @@ uint32_t getBits(uint32_t value, uint8_t endBig, uint8_t startSmall) {
 	return shifted_value & mask;
 }
 
-void setBits(uint32_t* dest, uint32_t value, uint8_t endBig, uint8_t startSmall) {
+uint32_t setBits(uint32_t a_dest, uint32_t b_value, uint8_t endBig, uint8_t startSmall) {
 	/*
-	a = dest. b = value
-	we want to set the
+	Example:
+
+
+	setBits(&a, b, 6, 4);
+
+	we want to touch from x to y.
+
+	return c;
+	     x y
+	    7654 3210
+	a = 1100 1010
+	b =  111
+	c = 1111 1010
+	     xxx
 
 	*/
-	if (endBig < startSmall) {
-		printf("[ERROR]: big >= small ");
-		abort();
-	}
 
-	/*Read: [Big, Small] Since we write [Most Significant -> Least Significant]*/
-	uint8_t a_left_mask_end = 31;
-	uint8_t a_left_mask_start = endBig + 1;
-	// [31, e+1]
+	uint32_t b_shifted = b_value << startSmall;
+	uint32_t a_reverse_mask = generateAntiMask(endBig, startSmall);
 
-	uint8_t b_mask_end = endBig;
-	uint8_t b_mask_start = startSmall;
-	// [e, s]
+	return a_dest & a_reverse_mask | b_shifted;
+}
 
-	uint8_t a_right_mask_end = startSmall - 1;
-	uint8_t a_right_mask_start = 0;
-	// [s-1, 0]
+/*
+    Dest: The destination
+    value: The value to write.
+    end big, startSmall: The bit values to write.
 
-	uint32_t a_left_mask = generateMask(a_left_mask_end, a_left_mask_start);
-	uint32_t b_mask = generateMask(endBig, startSmall);
-	uint32_t a_right_mask = generateMask(a_right_mask_end, a_right_mask_start);
+    Example:
+    Let's replace the E with a D for x = 0xFACEB007;
 
-	uint32_t a = *dest;
-	uint32_t b_shifted = value >> startSmall;
+    Dest = &x.
+    EB007
+    43210
+    5*4-1, 4*4.
+    20, 16
+    19. 16
+    19, 18, 17, 16
 
-	*dest = (a & a_left_mask) | (b_shifted & b_mask) | (a & a_right_mask);
+      F    A   C     E   B     0   0    7
+    1111 1010 1100 1110 1101 0000 0000 0111
+
+    setBits(&x, 0xD, 19, 16);
+
+*/
+inline static void setBitsModify(uint32_t* a_dest, uint32_t b_value, uint8_t endBig, uint8_t startSmall) {
+
+	*a_dest = setBits(*a_dest, b_value, endBig, startSmall);
 }
 
 uint32_t getBaseAddress(GDT* gdt, size_t index) {
@@ -120,49 +214,65 @@ void setBaseAddress(GDT* gdt, size_t index, uint32_t baseAddress) {
 
 	SegmentDescriptor* sd = &gdt->segmentsInfo[index];
 
+	printBinary(baseAddress, "baseAddress");
+
 	uint32_t lower_31_16 = getBits(baseAddress, 15, 0);
 	uint32_t higher_7_0 = getBits(baseAddress, 23, 16);
 	uint32_t higher_31_24 = getBits(baseAddress, 31, 24);
 
-	setBits(&sd->lower, lower_31_16, 31, 16);
-	setBits(&sd->higher, higher_7_0, 7, 0);
-	setBits(&sd->higher, higher_31_24, 31, 24);
-}
-
-char* printBits32(uint32_t a) {
-	char* print_string = (char*)malloc(33);
-	print_string[32] = 0;
-
-	for (uint8_t bitIndex = 0; bitIndex < 32; bitIndex++) {
-		uint8_t c = a >> bitIndex & 1;
-		print_string[(32 - 1) - bitIndex] = '0' + (char)c;
-	}
-
-	return print_string;
-}
-
-void print_separeted_by_4(char* bitString) {
-	for (uint8_t printIndex = 0; printIndex < 32; printIndex++) {
-		printf("%c", *(bitString + printIndex));
-		if (((printIndex + 1) % 4 == 0) && (printIndex != 31))
-			printf(" ");
-	}
 	printf("\n");
+	printBinary(higher_31_24, "higher_31_24 (Base 31-24)"); // 8
+	printBinary(higher_7_0, "higher_7_0 (Base 23-16)  ");   // 8
+
+	printBinary(lower_31_16, "lower_31_16 (Base 15-0)  "); // 8
+
+	setBitsModify(&sd->lower, lower_31_16, 31, 16);
+	setBitsModify(&sd->higher, higher_7_0, 7, 0);
+	setBitsModify(&sd->higher, higher_31_24, 31, 24);
+
+	printf("\nhigher, lower\n");
+	ps4(sd->higher);
+	// ps4(sd->lower);
+
+	return;
 }
 
-static inline void ps4(uint32_t a) {
-	char* str = printBits32(a);
-	print_separeted_by_4(str);
-	free(str);
+void test(void) {
+	printf("0xFACEB007 should be transformed to 0xFACDB007\n");
+	uint32_t x = 0xFACEB007;
+	printf("start = %x\n", x);
+
+	setBitsModify(&x, 0xD, 19, 16);
+
+	printf("modified = %x\n", x);
+	ps4(x);
+}
+
+void test2(void) {
+	uint32_t a = generateMask(13, 9);
+	printf("%x\n", a);
+	ps4(a);
 }
 
 int main(void) {
 
-	ps4(0xfedc1234);
+	printf("\n\n\n-----Start of Program------\n\n\n");
 
+	// test();
+	// exit(0);
+	// test2();
+
+	// ps4(0xfedc1234);
 	GDT gdt = {0};
-	setBaseAddress(&gdt, 5, 0xdeadface);
+	printf("\n\n====== Start OF SETTING BASE ADDRESS ======\n");
+	setBaseAddress(&gdt, 5, 0xfedc1234);
+	printf("====== END OF BASE ADDRESS ======\n\n\n");
+
+	printf("Lower = %s\n", binaryNumberToString(gdt.segmentsInfo[5].lower));
+	printf("Higher = %s\n", binaryNumberToString(gdt.segmentsInfo[5].higher));
+
 	uint32_t val = getBaseAddress(&gdt, 5);
-	ps4(val);
+	char* nbr = binaryNumberToString(val);
+	printf("got back = %s\n", nbr);
 	printf("%x\n", val);
 }
