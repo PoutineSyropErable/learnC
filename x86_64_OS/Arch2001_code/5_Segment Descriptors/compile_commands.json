@@ -28,11 +28,23 @@
       "/usr/bin/gcc",
       "-c",
       "-o",
-      "build/descriptors.o",
-      "descriptors.c"
+      "build/segment_descriptor_internals.o",
+      "segment_descriptor_internals.c"
     ],
     "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
-    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/descriptors.c",
-    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/descriptors.o"
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/segment_descriptor_internals.c",
+    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/segment_descriptor_internals.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "build/main.o",
+      "main.c"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/main.c",
+    "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/main.o"
   }
 ]
