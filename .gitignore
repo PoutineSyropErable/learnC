@@ -1,5 +1,6 @@
 
 **/a.out
+**/*.o
 
 
 ./x86_64/zzz_manuals/intel/Combined Intel Manual.pdf

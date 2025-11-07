@@ -186,10 +186,10 @@ Page 9
 ---
 # Address Spaces restated 1
 
-- Logical Address   : Far pointer that specifies a segment to offset within
-- Linear Address    : Flat 32/64 bit nonational address. Post segmentation. 
-- Virtual Address   : Address that takes paging into account 
-- Physical Address  : Offset into physical ram
+- Logical Address   : Far pointer that specifies a segment to offset within | ie: DS:0xff23
+- Linear Address    : Flat 32/64 bit nonational address. Post segmentation. | ie: 0x123bc
+- Virtual Address   : Address that takes paging into account                | same as above
+- Physical Address  : Offset into physical ram                              | same as above
 
 
 *(Before enabling paging)*

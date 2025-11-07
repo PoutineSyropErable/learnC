@@ -5,10 +5,10 @@
       "-c",
       "-o",
       "build/binary_operation.o",
-      "binary_operation.c"
+      "f1_binary_operation.c"
     ],
     "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
-    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/binary_operation.c",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/f1_binary_operation.c",
     "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/binary_operation.o"
   },
   {
@@ -17,10 +17,10 @@
       "-c",
       "-o",
       "build/string.o",
-      "string.c"
+      "f2_string.c"
     ],
     "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
-    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/string.c",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/f2_string.c",
     "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/string.o"
   },
   {
@@ -29,10 +29,10 @@
       "-c",
       "-o",
       "build/segment_descriptor_internals.o",
-      "segment_descriptor_internals.c"
+      "f3_segment_descriptor_internals.c"
     ],
     "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
-    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/segment_descriptor_internals.c",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/f3_segment_descriptor_internals.c",
     "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/segment_descriptor_internals.o"
   },
   {
@@ -41,10 +41,10 @@
       "-c",
       "-o",
       "build/main.o",
-      "main.c"
+      "f4_main.c"
     ],
     "directory": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors",
-    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/main.c",
+    "file": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/f4_main.c",
     "output": "/home/francois/Documents/zzz__PersonalProjects/Learn C And Assembly/Exercises/x86_64_OS/Arch2001_code/5_Segment Descriptors/build/main.o"
   }
 ]

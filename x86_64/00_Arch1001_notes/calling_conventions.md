@@ -32,6 +32,7 @@ Microsoft x64 abi, and the System V "x86_64" abi (the only two talking about in 
 ## These registers belong to the callee
 ## The caller is in charged of saving before call, and restoring after call
 
+:Register order, register orders. argument orders. 
 ; for easy <leader>FG ;
 ARG1: RDI: 1 
 ARG2: RSI: 2 
